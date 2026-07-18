@@ -15,8 +15,7 @@ model Business {
   industry  String?
   timezone  String   @default("UTC")
   createdAt DateTime @default(now())
-
-  leads Lead[]
+  leads     Lead[]
 
   @@map("businesses")
 }
@@ -34,10 +33,9 @@ model Lead {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   contactedAt DateTime?
-
-  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  tasks      Task[]
-  activities Activity[]
+  activities  Activity[]
+  business    Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  tasks       Task[]
 
   @@index([businessId])
   @@index([businessId, status])
@@ -52,8 +50,7 @@ model Task {
   dueAt       DateTime
   status      TaskStatus @default(PENDING)
   completedAt DateTime?
-
-  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lead        Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([leadId])
   @@index([status, dueAt])
@@ -66,8 +63,7 @@ model Activity {
   type      ActivityType
   metadata  Json?
   createdAt DateTime     @default(now())
-
-  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lead      Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([leadId])
   @@map("activities")
