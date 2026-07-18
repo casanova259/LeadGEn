@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Business {
+  id        String   @id @default(cuid())
+  ownerId   String   @unique
+  name      String
+  industry  String?
+  timezone  String   @default("UTC")
+  createdAt DateTime @default(now())
+
+  leads Lead[]
+
+  @@map("businesses")
+}
+
+model Lead {
+  id          String       @id @default(cuid())
+  businessId  String
+  name        String
+  phone       String?
+  email       String?
+  source      LeadSource
+  status      LeadStatus   @default(NEW)
+  priority    LeadPriority @default(NORMAL)
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  contactedAt DateTime?
+
+  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  tasks      Task[]
+  activities Activity[]
+
+  @@index([businessId])
+  @@index([businessId, status])
+  @@index([businessId, priority, status, createdAt])
+  @@map("leads")
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  leadId      String
+  type        TaskType
+  dueAt       DateTime
+  status      TaskStatus @default(PENDING)
+  completedAt DateTime?
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([status, dueAt])
+  @@map("tasks")
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  leadId    String
+  type      ActivityType
+  metadata  Json?
+  createdAt DateTime     @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@map("activities")
+}
+
+enum LeadSource {
+  WEBSITE
+  WHATSAPP
+  PHONE
+  WALK_IN
+  FACEBOOK_ADS
+  INSTAGRAM_ADS
+  GOOGLE_ADS
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  FOLLOW_UP
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+enum LeadPriority {
+  NORMAL
+  HOT
+}
+
+enum TaskType {
+  FOLLOW_UP
+  CALL
+  EMAIL
+}
+
+enum TaskStatus {
+  PENDING
+  COMPLETED
+  OVERDUE
+}
+
+enum ActivityType {
+  LEAD_CREATED
+  STATUS_CHANGED
+  TASK_COMPLETED
+  LEAD_UPDATED
+  LEAD_CONVERTED
+}
