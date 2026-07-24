@@ -1,7 +1,13 @@
+"use server";
+
+
 import Link from "next/link";
 import { getOrCreateBusiness } from "@/src/server/services/business.service";
 import { listLeads } from "@/src/server/services/lead.service";
 import { LeadStatus, LeadPriority } from "@prisma/client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { FormSelect } from "@/components/shared/Form-select";
 
 export default async function LeadsPage({
   searchParams,
@@ -20,36 +26,43 @@ export default async function LeadsPage({
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Leads</h1>
-        <Link
-          href="/leads/new"
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium"
-        >
-          + New Lead
-        </Link>
+        <Button asChild>
+          <Link href="/leads/new">+ New Lead</Link>
+        </Button>
       </div>
 
       <form className="flex gap-2">
-        <input
-          name="q"
-          defaultValue={params.q}
-          placeholder="Search name, phone, email..."
-          className="border rounded-md px-3 py-2 text-sm flex-1"
-        />
-        <select name="status" defaultValue={params.status} className="border rounded-md px-3 py-2 text-sm">
-          <option value="">All statuses</option>
-          <option value="NEW">New</option>
-          <option value="CONTACTED">Contacted</option>
-          <option value="FOLLOW_UP">Follow Up</option>
-          <option value="QUALIFIED">Qualified</option>
-          <option value="CONVERTED">Converted</option>
-          <option value="LOST">Lost</option>
-        </select>
-        <select name="priority" defaultValue={params.priority} className="border rounded-md px-3 py-2 text-sm">
-          <option value="">All priorities</option>
-          <option value="NORMAL">Normal</option>
-          <option value="HOT">Hot</option>
-        </select>
-        <button className="border rounded-md px-4 py-2 text-sm">Filter</button>
+        <Input name="q" defaultValue={params.q} placeholder="Search name, phone, email..." className="flex-1" />
+
+        <div className="w-40">
+          <FormSelect
+            name="status"
+            defaultValue={params.status ?? ""}
+            placeholder="All statuses"
+            options={[
+              { value: "NEW", label: "New" },
+              { value: "CONTACTED", label: "Contacted" },
+              { value: "FOLLOW_UP", label: "Follow Up" },
+              { value: "QUALIFIED", label: "Qualified" },
+              { value: "CONVERTED", label: "Converted" },
+              { value: "LOST", label: "Lost" },
+            ]}
+          />
+        </div>
+
+        <div className="w-40">
+          <FormSelect
+            name="priority"
+            defaultValue={params.priority ?? ""}
+            placeholder="All priorities"
+            options={[
+              { value: "NORMAL", label: "Normal" },
+              { value: "HOT", label: "Hot" },
+            ]}
+          />
+        </div>
+
+        <Button type="submit" variant="outline">Filter</Button>
       </form>
 
       <div className="border rounded-md divide-y">
