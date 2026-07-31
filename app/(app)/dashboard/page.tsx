@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { getOrCreateBusiness } from "@/src/server/services/business.service";
-import { getRescueQueue, getDashboardStats } from "@/src/server/services/task.service";
+import { getRescueQueue, getDashboardStats, getLeadAnalytics } from "@/src/server/services/task.service";
+import { AnalyticsCharts } from "@/components/shared/analytics-charts";
 
 export default async function DashboardPage() {
   const business = await getOrCreateBusiness();
-  const [stats, rescueQueue] = await Promise.all([
+  const [stats, rescueQueue, analytics] = await Promise.all([
     getDashboardStats(business.id),
     getRescueQueue(business.id),
+    getLeadAnalytics(business.id),
   ]);
 
   const cards = [
@@ -55,6 +57,12 @@ export default async function DashboardPage() {
           </div>
         </div>
       )}
+
+      <AnalyticsCharts
+        bySource={analytics.bySource}
+        byStatus={analytics.byStatus}
+        conversionRate={analytics.conversionRate}
+      />
     </div>
   );
 }

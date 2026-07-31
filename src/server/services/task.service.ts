@@ -39,6 +39,31 @@ export async function getRescueQueue(businessId: string) {
   });
 }
 
+export async function getLeadAnalytics(businessId: string) {
+  const [bySource, byStatus] = await Promise.all([
+    prisma.lead.groupBy({
+      by: ["source"],
+      where: { businessId },
+      _count: true,
+    }),
+    prisma.lead.groupBy({
+      by: ["status"],
+      where: { businessId },
+      _count: true,
+    }),
+  ]);
+
+  const total = byStatus.reduce((sum, s) => sum + s._count, 0);
+  const converted = byStatus.find((s) => s.status === "CONVERTED")?._count ?? 0;
+  const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
+
+  return {
+    bySource: bySource.map((s) => ({ name: s.source, value: s._count })),
+    byStatus: byStatus.map((s) => ({ name: s.status, value: s._count })),
+    conversionRate,
+  };
+}
+
 export async function getDashboardStats(businessId: string) {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
