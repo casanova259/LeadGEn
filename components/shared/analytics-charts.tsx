@@ -24,7 +24,7 @@ export function AnalyticsCharts({
   conversionRate: number;
 }) {
   return (
-    <div className="grid md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div className="border rounded-md p-4">
         <div className="text-sm font-medium mb-2">Leads by Source</div>
         <ResponsiveContainer width="100%" height={220}>

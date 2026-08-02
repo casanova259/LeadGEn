@@ -1,6 +1,3 @@
-"use server";
-
-
 import Link from "next/link";
 import { getOrCreateBusiness } from "@/src/server/services/business.service";
 import { listLeads } from "@/src/server/services/lead.service";
@@ -31,35 +28,37 @@ export default async function LeadsPage({
         </Button>
       </div>
 
-      <form className="flex gap-2">
+      <form className="flex flex-col sm:flex-row gap-2">
         <Input name="q" defaultValue={params.q} placeholder="Search name, phone, email..." className="flex-1" />
 
-        <div className="w-40">
-          <FormSelect
-            name="status"
-            defaultValue={params.status ?? ""}
-            placeholder="All statuses"
-            options={[
-              { value: "NEW", label: "New" },
-              { value: "CONTACTED", label: "Contacted" },
-              { value: "FOLLOW_UP", label: "Follow Up" },
-              { value: "QUALIFIED", label: "Qualified" },
-              { value: "CONVERTED", label: "Converted" },
-              { value: "LOST", label: "Lost" },
-            ]}
-          />
-        </div>
+        <div className="flex gap-2">
+          <div className="w-1/2 sm:w-40">
+            <FormSelect
+              name="status"
+              defaultValue={params.status ?? ""}
+              placeholder="All statuses"
+              options={[
+                { value: "NEW", label: "New" },
+                { value: "CONTACTED", label: "Contacted" },
+                { value: "FOLLOW_UP", label: "Follow Up" },
+                { value: "QUALIFIED", label: "Qualified" },
+                { value: "CONVERTED", label: "Converted" },
+                { value: "LOST", label: "Lost" },
+              ]}
+            />
+          </div>
 
-        <div className="w-40">
-          <FormSelect
-            name="priority"
-            defaultValue={params.priority ?? ""}
-            placeholder="All priorities"
-            options={[
-              { value: "NORMAL", label: "Normal" },
-              { value: "HOT", label: "Hot" },
-            ]}
-          />
+          <div className="w-1/2 sm:w-40">
+            <FormSelect
+              name="priority"
+              defaultValue={params.priority ?? ""}
+              placeholder="All priorities"
+              options={[
+                { value: "NORMAL", label: "Normal" },
+                { value: "HOT", label: "Hot" },
+              ]}
+            />
+          </div>
         </div>
 
         <Button type="submit" variant="outline">Filter</Button>
