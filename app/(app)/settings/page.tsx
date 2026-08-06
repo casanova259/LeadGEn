@@ -1,5 +1,5 @@
-import { getOrCreateBusiness } from "@/server/services/business.service";
-import { updateBusinessAction } from "@/server/actions/settings.actions";
+import { getOrCreateBusiness } from "@/src/server/services/business.service";
+import { updateBusinessAction } from "@/src/server/actions/setting.actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
