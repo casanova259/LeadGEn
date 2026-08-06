@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/src/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function getOrCreateBusiness() {
   const { userId } = await auth();
@@ -19,4 +19,14 @@ export async function getOrCreateBusiness() {
   }
 
   return business;
+}
+
+export async function updateBusiness(
+  ownerId: string,
+  data: { name?: string; industry?: string; timezone?: string }
+) {
+  return prisma.business.update({
+    where: { ownerId },
+    data,
+  });
 }
