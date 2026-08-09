@@ -5,18 +5,14 @@ export async function getOrCreateBusiness() {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  let business = await prisma.business.findUnique({
+  const business = await prisma.business.upsert({
     where: { ownerId: userId },
+    update: {},
+    create: {
+      ownerId: userId,
+      name: "My Business",
+    },
   });
-
-  if (!business) {
-    business = await prisma.business.create({
-      data: {
-        ownerId: userId,
-        name: "My Business",
-      },
-    });
-  }
 
   return business;
 }
