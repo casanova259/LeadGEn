@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
-const inter = Inter({
+const geistSans = Geist({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-geist-sans",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
@@ -45,7 +50,7 @@ export default function RootLayout({
         `className="dark"` to that route group's own top-level element)
         so only the dashboard renders dark, not the marketing site.
       */}
-      <html lang="en" className={inter.variable}>
+      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
         <body className="font-sans antialiased">{children}</body>
       </html>
     </ClerkProvider>
