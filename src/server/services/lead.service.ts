@@ -1,4 +1,4 @@
-import { prisma } from "@/src/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { LeadStatus, LeadPriority, LeadSource, Prisma } from "@prisma/client";
 
 export type CreateLeadInput = {
