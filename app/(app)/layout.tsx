@@ -1,30 +1,26 @@
-import { getOrCreateBusiness } from "@/src/server/services/business.service";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/shared/Sidebar";
 import { Navbar } from "@/components/shared/Navbar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { TooltipProvider } from "@/components/ui/tooltip";
 
-export default async function DashboardLayout({
+export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await getOrCreateBusiness();
-
   return (
-    <TooltipProvider>
+    <div className="dark">
       <SidebarProvider>
-        <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <div className="flex items-center border-b h-14 px-2">
-            <SidebarTrigger />
-            <div className="flex-1">
+        <TooltipProvider>
+          <div className="flex min-h-screen w-full bg-background text-foreground">
+            <AppSidebar />
+            <div className="flex flex-1 flex-col">
               <Navbar />
+              <main className="flex-1">{children}</main>
             </div>
           </div>
-          <main className="flex-1">{children}</main>
-        </div>
+        </TooltipProvider>
       </SidebarProvider>
-    </TooltipProvider>
+    </div>
   );
 }

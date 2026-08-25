@@ -15,20 +15,18 @@ export function EmptyState({
   ctaHref?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-[#e5e7eb] bg-white px-6 py-16 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f5f5f5] text-[#6b7280]">
+    <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-800 bg-[#111113] px-6 py-16 text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800 text-zinc-400">
         <Icon size={22} strokeWidth={1.75} />
       </div>
-      <h3 className="mt-4 text-[18px] font-semibold text-[#111111]">
-        {title}
-      </h3>
-      <p className="mt-1 max-w-sm text-[14px] leading-relaxed text-[#6b7280]">
+      <h3 className="mt-4 text-[16px] font-semibold text-white">{title}</h3>
+      <p className="mt-1 max-w-sm text-[13px] leading-relaxed text-zinc-500">
         {description}
       </p>
       {ctaLabel && ctaHref && (
         <Link
           href={ctaHref}
-          className="mt-6 flex h-10 items-center rounded-lg bg-[#111111] px-5 text-[14px] font-semibold text-white transition hover:bg-[#242424]"
+          className="mt-6 flex h-9 items-center rounded-lg bg-white px-4 text-[13px] font-semibold text-[#0a0a0a] transition hover:bg-zinc-200"
         >
           {ctaLabel}
         </Link>

@@ -1,7 +1,22 @@
-import Link from "next/link";
+import { Flame } from "lucide-react";
 import { getOrCreateBusiness } from "@/src/server/services/business.service";
-import { getRescueQueue, getDashboardStats, getLeadAnalytics } from "@/src/server/services/task.service";
+import {
+  getRescueQueue,
+  getDashboardStats,
+  getLeadAnalytics,
+} from "@/src/server/services/task.service";
 import { AnalyticsCharts } from "@/components/shared/analytics-charts";
+import { StatCard, DashboardCard } from "@/components/shared/dashboard-card";
+import { ListRow, ListRowDivider } from "@/components/shared/list-row";
+import { EmptyState } from "@/components/shared/empty-state";
+
+function hoursAgo(date: Date) {
+  const hrs = Math.floor((Date.now() - new Date(date).getTime()) / 36e5);
+  if (hrs < 1) return "just now";
+  if (hrs < 24) return `${hrs}h no contact`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d no contact`;
+}
 
 export default async function DashboardPage() {
   const business = await getOrCreateBusiness();
@@ -20,42 +35,57 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen space-y-6 bg-[#0a0a0a] p-6">
       <div>
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to Lost Leads.</p>
+        <h1 className="text-[22px] font-semibold tracking-[-0.3px] text-white">
+          Dashboard
+        </h1>
+        <p className="text-[14px] text-zinc-500">Welcome to Lost Leads.</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      {/* Stat cards — no fabricated trend %, this data doesn't include
+          a prior-period comparison yet. Add `trend`/`trendLabel` props
+          on StatCard once getDashboardStats() returns deltas. */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         {cards.map((c) => (
-          <div key={c.label} className="border rounded-md p-4">
-            <div className="text-2xl font-semibold">{c.value}</div>
-            <div className="text-xs text-muted-foreground">{c.label}</div>
-          </div>
+          <StatCard key={c.label} label={c.label} value={String(c.value)} />
         ))}
       </div>
 
-      {rescueQueue.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold mb-2">🔥 Rescue Queue</h2>
-          <div className="border border-red-300 rounded-md divide-y">
-            {rescueQueue.map((lead) => (
-              <Link
-                key={lead.id}
-                href={`/leads/${lead.id}`}
-                className="flex items-center justify-between px-4 py-3 hover:bg-muted text-sm"
-              >
-                <div>
-                  <div className="font-medium">{lead.name}</div>
-                  <div className="text-muted-foreground">{lead.phone || lead.email || "—"}</div>
-                </div>
-                <div className="text-xs text-red-500">
-                  Since {new Date(lead.createdAt).toLocaleDateString()}
-                </div>
-              </Link>
+      {/* Rescue Queue */}
+      {rescueQueue.length > 0 ? (
+        <DashboardCard
+          title="Rescue Queue"
+          action={
+            <span className="flex items-center gap-1.5 rounded-full border border-orange-900 px-2.5 py-1 text-[12px] font-medium text-orange-400">
+              <Flame size={12} />
+              {rescueQueue.length} need attention
+            </span>
+          }
+        >
+          <div>
+            {rescueQueue.map((lead, i) => (
+              <div key={lead.id}>
+                <ListRow
+                  href={`/leads/${lead.id}`}
+                  leading={
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-orange-500" />
+                  }
+                  primary={lead.name}
+                  secondary={lead.phone || lead.email || "—"}
+                  trailing={hoursAgo(lead.createdAt)}
+                />
+                {i < rescueQueue.length - 1 && <ListRowDivider />}
+              </div>
             ))}
           </div>
-        </div>
+        </DashboardCard>
+      ) : (
+        <EmptyState
+          icon={Flame}
+          title="Nothing to rescue right now"
+          description="Hot leads that go 24 hours without contact will show up here automatically."
+        />
       )}
 
       <AnalyticsCharts
