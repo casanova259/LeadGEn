@@ -1,7 +1,7 @@
 // Adapted from Originkit hero-01 for Lost Leads · stack: nextjs · styling: tailwind
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import SpotlightReveal from "@/components/originkit/ui/hero-01/spotlight-reveal";
 import TrustedBy from "@/components/originkit/ui/hero-01/trusted-by";
@@ -45,7 +45,7 @@ const LogoMark = () => (
 
 /** Inline replacement for the missing annotation-arrow.svg — a simple hand-drawn-style curve. */
 const AnnotationArrow = () => (
-  <svg width="27" height="78" viewBox="0 0 27 78" fill="none" className="lg:h-[78px] lg:w-[27px] h-[54px] w-[18px] max-w-none">
+  <svg width="27" height="78" viewBox="0 0 27 78" fill="none" className="lg:h-19.5 lg:w-6.75 h-13.5 w-4.5 max-w-none">
     <path
       d="M13 2C8 20 3 45 13 76"
       stroke="#144a58"
@@ -61,15 +61,15 @@ const Annotation = () => {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute top-[-26px] -left-[165px] hidden h-[140px] w-[253px] select-none md:block"
+      className="pointer-events-none absolute -top-6.5 -left-41.25 hidden h-35 w-63.25 select-none md:block"
     >
-      <div className="absolute top-[23px] left-[73px] flex h-[36px] w-[80px] items-center justify-center">
+      <div className="absolute top-5.75 left-18.25 flex h-9 w-20 items-center justify-center">
         <div className="-scale-y-100 rotate-[83.54deg]">
           <AnnotationArrow />
         </div>
       </div>
 
-      <p className="absolute lg:bottom-10 bottom-12 -left-10 lg:-left-20 flex w-[212px] rotate-[-10.6deg] flex-col justify-center text-center text-[12px] lg:text-[18px] leading-[1.25] tracking-[-0.02em] text-[#144a58]">
+      <p className="absolute lg:bottom-10 bottom-12 -left-10 lg:-left-20 flex w-53 rotate-[-10.6deg] flex-col justify-center text-center text-[12px] lg:text-[18px] leading-tight tracking-[-0.02em] text-[#144a58]">
         <span>Try it free</span>
         <span>for 14 days</span>
       </p>
@@ -112,7 +112,7 @@ const RESCUE_LEADS = [
 ];
 
 const RescueQueuePreview = () => (
-  <div className="relative overflow-hidden rounded-[5.5px] ipad:rounded-[9.5px] bg-gradient-to-b from-orange-50 via-white to-neutral-50 p-6 sm:p-8">
+  <div className="relative overflow-hidden rounded-[5.5px] ipad:rounded-[9.5px] bg-linear-to-b from-orange-50 via-white to-neutral-50 p-6 sm:p-8">
     <div className="mb-5 flex items-center gap-1.5">
       <span className="h-2.5 w-2.5 rounded-full bg-neutral-200" />
       <span className="h-2.5 w-2.5 rounded-full bg-neutral-200" />
@@ -146,7 +146,7 @@ const RescueQueuePreview = () => (
 
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-24 bg-linear-to-t from-[#f4f0e8] from-0% via-[#f4f0e8]/85 via-30% to-transparent ipad:h-28 laptop:h-32"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-24 bg-linear-to-t from-[#f4f0e8] from-0% via-[#f4f0e8]/85 via-30% to-transparent ipad:h-28 laptop:h-32"
     />
   </div>
 );
@@ -159,7 +159,7 @@ const BrowserPreview = ({ active }: { active: boolean }) => {
 
   return (
     <motion.div
-      className="relative mx-auto mt-4 mb-[-72px] w-full min-w-0 max-w-[56rem] self-center will-change-transform ipad:mb-0 ipad:mt-6 laptop:mt-8"
+      className="relative mx-auto mt-4 -mb-18 w-full min-w-0 max-w-4xl self-center will-change-transform ipad:mb-0 ipad:mt-6 laptop:mt-8"
       initial={hidden}
       animate={active ? visible : hidden}
       transition={{
@@ -226,13 +226,15 @@ const Hero01Content = () => {
   const [showCtas, setShowCtas] = useState(false);
   const [showTrusted, setShowTrusted] = useState(false);
 
-  useEffect(() => {
-    if (!prefersReducedMotion) return;
-    setShowHero(true);
-    setShowDescription(true);
-    setShowCtas(true);
-    setShowTrusted(true);
-  }, [prefersReducedMotion]);
+  // Reduced-motion visibility is derived directly from the media query on
+  // every render instead of being mirrored into state inside a useEffect.
+  // That avoids the "setState in effect" cascading-render lint (and the
+  // extra render pass it causes) while still reaching full visibility
+  // immediately for reduced-motion users.
+  const heroVisible = showHero || !!prefersReducedMotion;
+  const descriptionVisible = showDescription || !!prefersReducedMotion;
+  const ctasVisible = showCtas || !!prefersReducedMotion;
+  const trustedVisible = showTrusted || !!prefersReducedMotion;
 
   const handleNavComplete = () => {
     if (navDoneRef.current || prefersReducedMotion) return;
@@ -255,7 +257,7 @@ const Hero01Content = () => {
     <main className="min-h-screen overflow-x-hidden bg-white px-3 pt-2.5 text-[#010110]">
       <section
         aria-labelledby="lostleads-hero-heading"
-        className="relative mx-auto w-full overflow-hidden md:rounded-[10px] bg-gradient-to-b from-orange-50 via-white to-neutral-50 bg-cover bg-center pb-0 rounded-[10px] ipad:pb-10 desktop-sm:min-h-200"
+        className="relative mx-auto w-full overflow-hidden md:rounded-[10px] bg-linear-to-b from-orange-50 via-white to-neutral-50 bg-cover bg-center pb-0 rounded-[10px] ipad:pb-10 desktop-sm:min-h-200"
       >
         <div className="relative z-10 flex w-full flex-col items-center px-3 pt-3 ipad:px-4 ipad:pt-4">
           <motion.header
@@ -323,7 +325,7 @@ const Hero01Content = () => {
 
           <div
             id="main"
-            className="mt-[62px] flex w-full max-w-162.75 scroll-mt-24 flex-col items-center gap-7 text-center iphone:mt-12 ipad:mt-16 ipad:gap-10 laptop:mt-31.5"
+            className="mt-15.5 flex w-full max-w-162.75 scroll-mt-24 flex-col items-center gap-7 text-center iphone:mt-12 ipad:mt-16 ipad:gap-10 laptop:mt-31.5"
           >
             <div className="flex w-full flex-col items-center gap-3 ipad:gap-3.5">
               <SpotlightReveal
@@ -331,12 +333,12 @@ const Hero01Content = () => {
                 text="Stop losing leads you already paid for."
                 blur={6}
                 delay={0}
-                active={showHero}
+                active={heroVisible}
                 onComplete={handleSpotlightComplete}
                 className="text-[32px] md:text-[44px] lg:text-[56px] font-medium leading-[1.15] tracking-[-0.02em] text-wrap text-[#010110] [text-shadow:0_5px_5px_rgba(0,0,0,0.05),0_1px_1px_rgba(0,0,0,0.16),0_1px_1px_rgba(255,255,255,0.6)] ipad:leading-[1.1]"
               />
               <SlideIn
-                active={showDescription}
+                active={descriptionVisible}
                 y={16}
                 duration={0.3}
                 onComplete={handleDescriptionComplete}
@@ -351,7 +353,7 @@ const Hero01Content = () => {
             </div>
 
             <SlideIn
-              active={showCtas}
+              active={ctasVisible}
               y={20}
               duration={0.3}
               className="relative flex w-full flex-col items-stretch gap-3 will-change-transform ipad:w-auto ipad:flex-row ipad:items-center ipad:justify-center ipad:gap-5"
@@ -359,24 +361,24 @@ const Hero01Content = () => {
               <Annotation />
               <a
                 href="/sign-up"
-                className="relative inline-flex min-h-11.5 w-full shrink-0 items-center justify-center overflow-clip rounded-full border-3 border-solid border-[#3E3E3E] bg-linear-to-b from-[#292929] to-[#111] py-3.5 pr-5 pl-[19px] text-center text-[clamp(15px,2.5vw,16px)] font-medium leading-[1.1] tracking-[-0.01em] text-white transition-[opacity,transform] duration-200 ease focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#010110] active:scale-[0.96] motion-reduce:active:scale-100 ipad:w-auto [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90"
+                className="relative inline-flex min-h-11.5 w-full shrink-0 items-center justify-center overflow-clip rounded-full border-3 border-solid border-[#3E3E3E] bg-linear-to-b from-[#292929] to-[#111] py-3.5 pr-5 pl-4.75 text-center text-[clamp(15px,2.5vw,16px)] font-medium leading-[1.1] tracking-[-0.01em] text-white transition-[opacity,transform] duration-200 ease focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#010110] active:scale-[0.96] motion-reduce:active:scale-100 ipad:w-auto [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90"
               >
                 Try it free for 14 days
               </a>
               <a
                 href="#pricing"
-                className="relative inline-flex min-h-11.5 w-full shrink-0 items-center justify-center rounded-full border-3 border-solid border-white bg-linear-to-b from-[#f4f4f4] to-[#fefefe] py-3.5 pr-5 pl-[19px] text-center text-[clamp(15px,2.5vw,16px)] font-medium leading-[1.1] tracking-[-0.01em] text-[#161616] shadow-[0_0_0.225px_rgba(0,0,0,0.07),0_0_0.225px_rgba(0,0,0,0.05),0_2.698px_2.923px_-1.349px_rgba(0,0,0,0.25),0_0.899px_3.598px_0.899px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-1px_1px_rgba(0,0,0,0.06)] transition-[transform,box-shadow,opacity] duration-200 ease focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#010110] active:scale-[0.96] motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:hover:translate-y-0 ipad:w-auto [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-0.5 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-95 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_0_0.225px_rgba(0,0,0,0.08),0_0_0.225px_rgba(0,0,0,0.06),0_4px_8px_-2px_rgba(0,0,0,0.22),0_2px_6px_1px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-1px_1px_rgba(0,0,0,0.06)]"
+                className="relative inline-flex min-h-11.5 w-full shrink-0 items-center justify-center rounded-full border-3 border-solid border-white bg-linear-to-b from-[#f4f4f4] to-[#fefefe] py-3.5 pr-5 pl-4.75 text-center text-[clamp(15px,2.5vw,16px)] font-medium leading-[1.1] tracking-[-0.01em] text-[#161616] shadow-[0_0_0.225px_rgba(0,0,0,0.07),0_0_0.225px_rgba(0,0,0,0.05),0_2.698px_2.923px_-1.349px_rgba(0,0,0,0.25),0_0.899px_3.598px_0.899px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-1px_1px_rgba(0,0,0,0.06)] transition-[transform,box-shadow,opacity] duration-200 ease focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#010110] active:scale-[0.96] motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:hover:translate-y-0 ipad:w-auto [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-0.5 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-95 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_0_0.225px_rgba(0,0,0,0.08),0_0_0.225px_rgba(0,0,0,0.06),0_4px_8px_-2px_rgba(0,0,0,0.22),0_2px_6px_1px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-1px_1px_rgba(0,0,0,0.06)]"
               >
                 See pricing
               </a>
             </SlideIn>
           </div>
 
-          <BrowserPreview active={showHero} />
+          <BrowserPreview active={heroVisible} />
         </div>
       </section>
       <div className="relative z-10 mt-0 flex flex-col items-center px-4 pt-13.5 md:pt-17.5 pb-12 ipad:px-6 ipad:pb-16 laptop:pb-20">
-        <TrustedBy logos={TRUSTED_LOGOS} active={showTrusted} />
+        <TrustedBy logos={TRUSTED_LOGOS} active={trustedVisible} />
       </div>
     </main>
   );
