@@ -34,7 +34,7 @@ const TRUSTED_NAMES = [
 const TRUSTED_LOGOS = TRUSTED_NAMES.map((name) => ({
   alt: name,
   ...textLogoDataUri(name),
-})) as const;
+}));
 
 /** Inline replacement for the missing logo-mark.svg — the real Lost Leads mark. */
 const LogoMark = () => (
