@@ -1,0 +1,13 @@
+/* breakpoints.css — custom Tailwind v4 breakpoints required by the OriginKit
+   hero-01 / features-01 components (ipad, ipad-landscape, laptop, desktop-sm,
+   iphone). These were referenced throughout the delivered components but not
+   defined anywhere in the package, so they're added here. Adjust the pixel
+   values if you want them to match a different design system. */
+
+@theme {
+  --breakpoint-iphone: 400px;
+  --breakpoint-ipad: 768px;
+  --breakpoint-ipad-landscape: 1024px;
+  --breakpoint-laptop: 1200px;
+  --breakpoint-desktop-sm: 1440px;
+}
