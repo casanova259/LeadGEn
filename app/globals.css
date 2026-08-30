@@ -9,6 +9,11 @@
   --breakpoint-desktop-sm: 1440px;
 }
 
+@theme {
+  --font-switzer: "Switzer", Inter, ui-sans-serif, sans-serif;
+  --breakpoint-android-sm: 360px;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

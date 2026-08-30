@@ -353,7 +353,7 @@ const Features01 = () => {
         className="relative mx-auto my-[8px] flex w-full max-w-[97dvw] flex-col items-center overflow-clip rounded-3xl px-4 py-16 sm:px-6 sm:py-20 ipad:px-10 ipad:py-24 laptop:px-[clamp(2rem,10vw,13.8rem)] laptop:py-25"
         style={{
           backgroundImage:
-            "linear-gradient(135deg, #fffcf5 0%, #fdfdfd 40%, #f7fcff 100%)",
+            "linear-gradient(120deg, #f0a63e 0%, #f7c565 22%, #fbf3e2 48%, #eaf6fc 72%, #b9e3f5 100%)",
         }}
       >
         <div className="relative z-10 flex w-full flex-col items-center gap-10 ipad:gap-15">
