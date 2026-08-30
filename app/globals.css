@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@theme {
+  --breakpoint-iphone: 400px;
+  --breakpoint-ipad: 768px;
+  --breakpoint-ipad-landscape: 1024px;
+  --breakpoint-laptop: 1200px;
+  --breakpoint-desktop-sm: 1440px;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -114,6 +122,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
