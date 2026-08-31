@@ -2,16 +2,36 @@
 @import "tw-animate-css";
 
 @theme {
+  /* breakpoints */
+  --breakpoint-android-sm: 360px;
   --breakpoint-iphone: 400px;
   --breakpoint-ipad: 768px;
   --breakpoint-ipad-landscape: 1024px;
   --breakpoint-laptop: 1200px;
   --breakpoint-desktop-sm: 1440px;
+  --breakpoint-wide-lg: 1440px;
+
+  /* fonts */
+  --font-tight: "Instrument Sans", Inter, ui-sans-serif, sans-serif;
+  --font-helvetica-neue: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-switzer: "Switzer", Inter, ui-sans-serif, sans-serif;
+
+  /* animation */
+  --animate-hero-reveal: hero-reveal 300ms cubic-bezier(0.215, 0.61, 0.355, 1) both;
 }
 
-@theme {
-  --font-switzer: "Switzer", Inter, ui-sans-serif, sans-serif;
-  --breakpoint-android-sm: 360px;
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 @custom-variant dark (&:is(.dark *));
