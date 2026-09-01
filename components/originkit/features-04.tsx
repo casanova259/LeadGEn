@@ -41,40 +41,32 @@ const DesktopGlow = () => (
   </>
 );
 
-/**
- * The original package pointed avatar-1/2/3.png at real customer headshots
- * that weren't included in the zip. Rather than ship broken <img> tags, these
- * are generated as simple initials avatars from placeholder names — swap the
- * `src` values for real customer photos whenever you have them.
- */
-function initialsAvatarDataUri(initials: string, bg: string) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="${bg}"/><text x="32" y="40" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#ffffff" text-anchor="middle">${initials}</text></svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-}
-
 const AVATARS = [
-  { src: initialsAvatarDataUri("PN", "#f0a63e"), alt: "" },
-  { src: initialsAvatarDataUri("MD", "#4a90d9"), alt: "" },
-  { src: initialsAvatarDataUri("ET", "#e0824d"), alt: "" },
+  { src: "/features-04/avatar-1.png", alt: "Customer avatar 1" },
+  { src: "/features-04/avatar-2.png", alt: "Customer avatar 2" },
+  { src: "/features-04/avatar-3.png", alt: "Customer avatar 3" },
 ];
 
-/** Inline replacement for the missing flame.svg badge icon. */
+/** Use the supplied SVG badge asset instead of a custom inline approximation. */
 const FlameIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" className="size-[16px] ipad:size-[18px]">
-    <path
-      d="M8 1.5c.6 2 .3 3-1 4.3C5.6 6.9 5 8 5 9.3A3 3 0 0 0 8 12.5a3 3 0 0 0 3-3.2c1 .6 1.5 1.6 1.5 2.7A4.5 4.5 0 0 1 8 16.5 4.5 4.5 0 0 1 3.5 12c0-2 1.2-3.3 2.3-4.6C7 5.9 7.6 4 6.5 1.5A8 8 0 0 1 8 1.5Z"
-      fill="#111"
-    />
-  </svg>
+  <img
+    src="/features-04/flame.svg"
+    alt=""
+    width={16}
+    height={16}
+    className="size-[16px] object-contain ipad:size-[18px]"
+  />
 );
 
-/** Inline replacement for the missing pie-chart.svg icon. */
+/** Use the provided pie-chart asset instead of a custom inline approximation. */
 const PieChartIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" className="size-[24px] shrink-0">
-    <circle cx="12" cy="12" r="9" fill="#ededed" />
-    <path d="M12 12V3a9 9 0 0 1 9 9h-9Z" fill="#111" />
-    <path d="M12 12l6.36 6.36A9 9 0 0 1 12 21v-9Z" fill="#666" />
-  </svg>
+  <img
+    src="/features-04/pie-chart.svg"
+    alt=""
+    width={24}
+    height={24}
+    className="size-[24px] shrink-0 object-contain"
+  />
 );
 
 const FEATURES = {
@@ -82,7 +74,7 @@ const FEATURES = {
     title: "Focus",
     body: "Keep every lead organized and see at a glance who needs a follow-up next, so nothing sits in an inbox unanswered.",
     art: {
-      src: asset("focus.png"),
+      src: "/features-04/focus.png",
       alt: "An isometric cube rendered in ASCII characters",
       boxClassName: "h-[166px] w-[180px] ipad:h-[196px] ipad:w-[212px]",
       artClassName:
@@ -93,7 +85,7 @@ const FEATURES = {
     title: "Connect",
     body: "Capture leads from your website, WhatsApp, Instagram, Facebook, and email — all landing in one place, automatically.",
     art: {
-      src: asset("connect.png"),
+      src: "/features-04/connect.png",
       alt: "Interlocking isometric blocks rendered in ASCII characters",
       boxClassName: "h-[166px] w-[198px] ipad:h-[196px] ipad:w-[234px]",
       artClassName:
@@ -104,7 +96,7 @@ const FEATURES = {
     title: "Scale",
     body: "From a single location to a multi-location team, Lost Leads grows with your business while keeping follow-up just as simple.",
     art: {
-      src: asset("scale.png"),
+      src: "/features-04/scale.png",
       alt: "A rising staircase of isometric blocks rendered in ASCII characters",
       boxClassName:
         "h-[166px] w-[173px] ipad:h-[213px] ipad:w-[223px] desktop-sm:h-[271px] desktop-sm:w-[283px]",
@@ -162,7 +154,7 @@ export const FeaturesWhy = () => (
                     />
                   ))}
                 </div>
-                <p className="w-[154px] font-tight text-[16px] leading-[1.2] font-medium text-black desktop-sm:w-auto desktop-sm:text-[18px] desktop-sm:whitespace-nowrap">
+                <p className="w-[132px] font-tight text-[10px] leading-[1.1] font-medium tracking-[-0.2px] text-black desktop-sm:w-auto desktop-sm:text-[16px] desktop-sm:leading-[1.2] desktop-sm:tracking-[-0.32px] desktop-sm:whitespace-nowrap">
                   Built for clinics, salons &amp; agencies
                 </p>
               </Plate>
