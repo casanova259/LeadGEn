@@ -3,6 +3,7 @@ import { updateBusinessAction } from "@/src/server/actions/setting.actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { WebhookSettings } from "./_components/webhook-settings";
 
 const TIMEZONES = [
   "Asia/Kolkata",
@@ -27,7 +28,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="p-6 max-w-lg space-y-4">
+    <div className="p-6 max-w-2xl space-y-4">
       <h1 className="text-2xl font-semibold">Settings</h1>
       <p className="text-muted-foreground text-sm">Manage your business profile.</p>
 
@@ -63,6 +64,8 @@ export default async function SettingsPage() {
 
         <Button type="submit">Save Changes</Button>
       </form>
+
+      <WebhookSettings businessId={business.id} />
     </div>
   );
 }
