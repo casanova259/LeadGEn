@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion, AnimatePresence } from "motion/react";
 import SpotlightReveal from "@/components/originkit/ui/hero-01/spotlight-reveal";
 import TrustedBy from "@/components/originkit/ui/hero-01/trusted-by";
 
@@ -225,6 +225,7 @@ const Hero01Content = () => {
   const [showDescription, setShowDescription] = useState(false);
   const [showCtas, setShowCtas] = useState(false);
   const [showTrusted, setShowTrusted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!prefersReducedMotion) return;
@@ -313,6 +314,7 @@ const Hero01Content = () => {
 
               <button
                 type="button"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label="Open menu"
                 className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#111] text-white shadow-[0_4px_12px_rgba(0,0,0,0.18)] transition-[opacity,transform] duration-200 ease focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#010110] active:scale-[0.96] motion-reduce:active:scale-100 ipad:hidden [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90"
               >
@@ -320,6 +322,42 @@ const Hero01Content = () => {
               </button>
             </nav>
           </motion.header>
+
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: easeOutCubic }}
+                className="absolute top-[72px] left-3 right-3 z-50 flex flex-col rounded-[20px] bg-white p-5 shadow-[0_10px_40px_rgba(0,0,0,0.08)] ring-1 ring-black/5 ipad:hidden"
+              >
+                <nav className="flex flex-col gap-5">
+                  <a
+                    href="/sign-in"
+                    className="text-[17px] font-medium text-[#111]"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Sign in
+                  </a>
+                  <a
+                    href="#pricing"
+                    className="text-[17px] font-medium text-[#111]"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Pricing
+                  </a>
+                  <a
+                    href="/sign-up"
+                    className="mt-1 flex w-full items-center justify-center rounded-full bg-[#111] py-3.5 text-[17px] font-medium text-white shadow-sm"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Start free
+                  </a>
+                </nav>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div
             id="main"
