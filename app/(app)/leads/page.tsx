@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormSelect } from "@/components/shared/Form-select";
 
+import { InlineLeadRow } from "@/components/shared/inline-lead-row";
+
 export default async function LeadsPage({
   searchParams,
 }: {
@@ -24,7 +26,12 @@ export default async function LeadsPage({
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Leads</h1>
+        <div>
+          <h1 className="text-2xl font-semibold">Leads</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Click &ldquo;Edit&rdquo; on any lead to update contact details, status, or notes inline.
+          </p>
+        </div>
         <Button asChild>
           <Link href="/leads/new">+ New Lead</Link>
         </Button>
@@ -66,24 +73,12 @@ export default async function LeadsPage({
         <Button type="submit" variant="outline">Filter</Button>
       </form>
 
-      <div className="border rounded-md divide-y">
+      <div className="border rounded-md divide-y bg-card">
         {leads.length === 0 && (
           <div className="p-6 text-sm text-muted-foreground text-center">No leads yet.</div>
         )}
         {leads.map((lead) => (
-          <Link
-            key={lead.id}
-            href={`/leads/${lead.id}`}
-            className="flex items-center justify-between px-4 py-3 hover:bg-muted text-sm"
-          >
-            <div>
-              <div className="font-medium">
-                {lead.name} {lead.priority === "HOT" && <span className="text-red-500">🔥</span>}
-              </div>
-              <div className="text-muted-foreground">{lead.phone || lead.email || "—"}</div>
-            </div>
-            <div className="text-xs text-muted-foreground">{lead.status}</div>
-          </Link>
+          <InlineLeadRow key={lead.id} lead={lead} />
         ))}
       </div>
     </div>

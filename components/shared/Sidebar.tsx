@@ -74,6 +74,12 @@ export function AppSidebar({
                     {rescueCount}
                   </span>
                 )}
+                {item.href === "/leads" && rescueCount > 0 && (
+                  <span
+                    className="h-2 w-2 rounded-full bg-orange-500"
+                    title={`${rescueCount} leads need rescue`}
+                  />
+                )}
               </Link>
             );
           })}

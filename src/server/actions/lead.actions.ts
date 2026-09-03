@@ -23,11 +23,24 @@ export async function updateLeadAction(id: string, input: UpdateLeadInput) {
   await updateLead(id, business.id, input);
   revalidatePath("/leads");
   revalidatePath(`/leads/${id}`);
+  revalidatePath("/dashboard");
+}
+
+export async function markContactedAction(id: string) {
+  const business = await getOrCreateBusiness();
+  await updateLead(id, business.id, {
+    status: "CONTACTED",
+    contactedAt: new Date(),
+  });
+  revalidatePath("/leads");
+  revalidatePath(`/leads/${id}`);
+  revalidatePath("/dashboard");
 }
 
 export async function deleteLeadAction(id: string) {
   const business = await getOrCreateBusiness();
   await deleteLead(id, business.id);
   revalidatePath("/leads");
+  revalidatePath("/dashboard");
   redirect("/leads");
 }

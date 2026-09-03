@@ -39,6 +39,18 @@ export async function getRescueQueue(businessId: string) {
   });
 }
 
+export async function getRescueQueueCount(businessId: string) {
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  return prisma.lead.count({
+    where: {
+      businessId,
+      priority: "HOT",
+      status: "NEW",
+      createdAt: { lt: cutoff },
+    },
+  });
+}
+
 export async function getLeadAnalytics(businessId: string) {
   const [bySource, byStatus] = await Promise.all([
     prisma.lead.groupBy({
