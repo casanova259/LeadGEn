@@ -9,6 +9,7 @@ import { AnalyticsCharts } from "@/components/shared/analytics-charts";
 import { StatCard, DashboardCard } from "@/components/shared/dashboard-card";
 import { ListRow, ListRowDivider } from "@/components/shared/list-row";
 import { EmptyState } from "@/components/shared/empty-state";
+import { OnboardingChecklist } from "@/components/shared/onboarding-checklist";
 
 function hoursAgo(date: Date) {
   const hrs = Math.floor((Date.now() - new Date(date).getTime()) / 36e5);
@@ -25,6 +26,8 @@ export default async function DashboardPage() {
     getRescueQueue(business.id),
     getLeadAnalytics(business.id),
   ]);
+
+  const totalLeads = analytics.byStatus.reduce((sum, s) => sum + s.value, 0);
 
   const cards = [
     { label: "Today's Leads", value: stats.todaysLeads },
@@ -51,6 +54,11 @@ export default async function DashboardPage() {
           <StatCard key={c.label} label={c.label} value={String(c.value)} />
         ))}
       </div>
+
+      {/* Onboarding Checklist for new users */}
+      {totalLeads === 0 && (
+        <OnboardingChecklist businessId={business.id} />
+      )}
 
       {/* Rescue Queue */}
       {rescueQueue.length > 0 ? (
