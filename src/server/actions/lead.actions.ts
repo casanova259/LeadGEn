@@ -44,3 +44,54 @@ export async function deleteLeadAction(id: string) {
   revalidatePath("/dashboard");
   redirect("/leads");
 }
+
+export async function addLeadNoteAction(
+  leadId: string,
+  input: {
+    note: string;
+    category: "CALL" | "VOICEMAIL" | "MEETING" | "GENERAL";
+    scheduleFollowUp?: boolean;
+    followUpDueAt?: string;
+  }
+) {
+  const business = await getOrCreateBusiness();
+  const res = await (await import("@/src/server/services/lead.service")).addLeadNote(
+    leadId,
+    business.id,
+    {
+      note: input.note,
+      category: input.category,
+      scheduleFollowUp: input.scheduleFollowUp,
+      followUpDueAt: input.followUpDueAt ? new Date(input.followUpDueAt) : undefined,
+    }
+  );
+
+  revalidatePath(`/leads/${leadId}`);
+  revalidatePath("/tasks");
+  revalidatePath("/dashboard");
+  return res;
+}
+
+export async function importLeadsAction(
+  leads: Array<{
+    name: string;
+    phone?: string;
+    email?: string;
+    source?: any;
+    priority?: any;
+    notes?: string;
+  }>,
+  autoCreateTasks: boolean = true
+) {
+  const business = await getOrCreateBusiness();
+  const res = await (await import("@/src/server/services/lead.service")).batchImportLeads(
+    business.id,
+    leads,
+    { autoCreateTasks }
+  );
+
+  revalidatePath("/leads");
+  revalidatePath("/tasks");
+  revalidatePath("/dashboard");
+  return res;
+}

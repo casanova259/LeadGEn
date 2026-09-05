@@ -19,7 +19,11 @@ import {
   FileText,
   Tag,
   Sparkles,
+  Mic,
+  Users2,
+  MessageSquare,
 } from "lucide-react";
+import { LeadNoteComposer } from "@/components/leads/lead-note-composer";
 
 function formatRelative(date: Date) {
   const hrs = Math.floor((Date.now() - new Date(date).getTime()) / 36e5);
@@ -239,12 +243,14 @@ export default async function LeadDetailPage({
           </Card>
         </div>
 
-        {/* Right Column: Activity Timeline */}
-        <div className="lg:col-span-5">
-          <Card className="border-border bg-card h-full">
+        {/* Right Column: Interaction Logger & Activity Timeline */}
+        <div className="lg:col-span-5 space-y-6">
+          <LeadNoteComposer leadId={lead.id} />
+
+          <Card className="border-border bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Activity Timeline</CardTitle>
-              <CardDescription>Audited history of touchpoints and status changes</CardDescription>
+              <CardDescription>Audited history of touchpoints, calls, and status changes</CardDescription>
             </CardHeader>
             <CardContent>
               {lead.activities.length === 0 ? (
@@ -252,13 +258,43 @@ export default async function LeadDetailPage({
               ) : (
                 <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
                   {lead.activities.map((act) => {
-                    const info = ACTIVITY_LABELS[act.type] || {
+                    const meta = act.metadata as Record<string, unknown> | null;
+                    const isNote = meta?.action === "NOTE_ADDED";
+
+                    let info = ACTIVITY_LABELS[act.type] || {
                       label: act.type,
                       icon: ActivityIcon,
                       color: "text-muted-foreground bg-muted",
                     };
+
+                    if (isNote) {
+                      const noteCat = String(meta?.category || "GENERAL");
+                      const NoteIcon =
+                        noteCat === "CALL"
+                          ? Phone
+                          : noteCat === "VOICEMAIL"
+                          ? Mic
+                          : noteCat === "MEETING"
+                          ? Users2
+                          : FileText;
+
+                      const noteColor =
+                        noteCat === "CALL"
+                          ? "text-blue-500 bg-blue-500/10"
+                          : noteCat === "VOICEMAIL"
+                          ? "text-purple-500 bg-purple-500/10"
+                          : noteCat === "MEETING"
+                          ? "text-amber-500 bg-amber-500/10"
+                          : "text-zinc-400 bg-zinc-500/10";
+
+                      info = {
+                        label: `${noteCat.charAt(0) + noteCat.slice(1).toLowerCase()} Note`,
+                        icon: NoteIcon,
+                        color: noteColor,
+                      };
+                    }
+
                     const Icon = info.icon;
-                    const meta = act.metadata as Record<string, unknown> | null;
 
                     return (
                       <div key={act.id} className="relative">
@@ -276,6 +312,12 @@ export default async function LeadDetailPage({
                               {new Date(act.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </span>
                           </div>
+
+                          {Boolean(isNote && meta?.note) && (
+                            <div className="rounded-lg border border-border/60 bg-muted/40 p-2.5 text-xs text-foreground whitespace-pre-wrap mt-1">
+                              {String(meta?.note)}
+                            </div>
+                          )}
 
                           {Boolean(meta?.from && meta?.to) && (
                             <p className="text-xs text-muted-foreground">

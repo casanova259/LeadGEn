@@ -111,3 +111,113 @@ export async function listLeads(
     orderBy: { createdAt: "desc" },
   });
 }
+
+export type AddNoteInput = {
+  note: string;
+  category: "CALL" | "VOICEMAIL" | "MEETING" | "GENERAL";
+  scheduleFollowUp?: boolean;
+  followUpDueAt?: Date;
+};
+
+export async function addLeadNote(
+  leadId: string,
+  businessId: string,
+  input: AddNoteInput
+) {
+  const lead = await prisma.lead.findFirst({
+    where: { id: leadId, businessId },
+  });
+  if (!lead) throw new Error("Lead not found or unauthorized");
+
+  const activity = await prisma.activity.create({
+    data: {
+      leadId,
+      type: "LEAD_UPDATED",
+      metadata: {
+        action: "NOTE_ADDED",
+        note: input.note,
+        category: input.category,
+      },
+    },
+  });
+
+  // If follow-up requested, create task
+  let task = null;
+  if (input.scheduleFollowUp && input.followUpDueAt) {
+    task = await prisma.task.create({
+      data: {
+        leadId,
+        type: input.category === "CALL" ? "CALL" : "FOLLOW_UP",
+        dueAt: input.followUpDueAt,
+        status: "PENDING",
+      },
+    });
+  }
+
+  return { activity, task };
+}
+
+export type ImportLeadRow = {
+  name: string;
+  phone?: string;
+  email?: string;
+  source?: LeadSource;
+  priority?: LeadPriority;
+  notes?: string;
+};
+
+export async function batchImportLeads(
+  businessId: string,
+  rows: ImportLeadRow[],
+  options?: { autoCreateTasks?: boolean }
+) {
+  const autoTasks = options?.autoCreateTasks ?? true;
+  let importedCount = 0;
+  let errorCount = 0;
+
+  for (const row of rows) {
+    if (!row.name || !row.name.trim()) {
+      errorCount++;
+      continue;
+    }
+
+    try {
+      const lead = await prisma.lead.create({
+        data: {
+          businessId,
+          name: row.name.trim(),
+          phone: row.phone?.trim() || null,
+          email: row.email?.trim() || null,
+          source: row.source || "OTHER",
+          priority: row.priority || "NORMAL",
+          notes: row.notes?.trim() || null,
+        },
+      });
+
+      await prisma.activity.create({
+        data: {
+          leadId: lead.id,
+          type: "LEAD_CREATED",
+          metadata: { imported: true },
+        },
+      });
+
+      if (autoTasks) {
+        await prisma.task.create({
+          data: {
+            leadId: lead.id,
+            type: "FOLLOW_UP",
+            dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          },
+        });
+      }
+
+      importedCount++;
+    } catch (err) {
+      console.error("Failed to import lead row", row, err);
+      errorCount++;
+    }
+  }
+
+  return { importedCount, errorCount };
+}

@@ -10,6 +10,8 @@ import { FormSelect } from "@/components/shared/Form-select";
 
 import { InlineLeadRow } from "@/components/shared/inline-lead-row";
 
+import { LeadsHeaderActions } from "@/components/leads/leads-header-actions";
+
 export default async function LeadsPage({
   searchParams,
 }: {
@@ -25,16 +27,14 @@ export default async function LeadsPage({
 
   return (
     <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Leads</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             Click &ldquo;Edit&rdquo; on any lead to update contact details, status, or notes inline.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/leads/new">+ New Lead</Link>
-        </Button>
+        <LeadsHeaderActions />
       </div>
 
       <form className="flex flex-col sm:flex-row gap-2">
