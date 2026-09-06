@@ -219,13 +219,107 @@ export async function getDashboardStats(businessId: string) {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
 
-  const [todaysLeads, pendingTasks, hotLeads, converted, lost] = await Promise.all([
+  const [
+    todaysLeads,
+    pendingTasks,
+    hotLeads,
+    converted,
+    lost,
+    overdueTasks,
+    totalLeads,
+    completedToday,
+  ] = await Promise.all([
     prisma.lead.count({ where: { businessId, createdAt: { gte: startOfDay } } }),
     prisma.task.count({ where: { lead: { businessId }, status: "PENDING" } }),
-    prisma.lead.count({ where: { businessId, priority: "HOT", status: { notIn: ["CONVERTED", "LOST"] } } }),
+    prisma.lead.count({
+      where: { businessId, priority: "HOT", status: { notIn: ["CONVERTED", "LOST"] } },
+    }),
     prisma.lead.count({ where: { businessId, status: "CONVERTED" } }),
     prisma.lead.count({ where: { businessId, status: "LOST" } }),
+    prisma.task.count({
+      where: { lead: { businessId }, status: "PENDING", dueAt: { lt: new Date() } },
+    }),
+    prisma.lead.count({ where: { businessId } }),
+    prisma.task.count({
+      where: {
+        lead: { businessId },
+        status: "COMPLETED",
+        completedAt: { gte: startOfDay },
+      },
+    }),
   ]);
 
-  return { todaysLeads, pendingTasks, hotLeads, converted, lost };
+  return {
+    todaysLeads,
+    pendingTasks,
+    hotLeads,
+    converted,
+    lost,
+    overdueTasks,
+    totalLeads,
+    completedToday,
+  };
 }
+
+export async function getDashboardActivityAndFlow(businessId: string) {
+  const now = new Date();
+
+  // 6-month monthly flow
+  const monthsData: { month: string; date: string; leads: number; converted: number }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const nextD = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+    const [leadCount, convertedCount] = await Promise.all([
+      prisma.lead.count({
+        where: {
+          businessId,
+          createdAt: { gte: d, lt: nextD },
+        },
+      }),
+      prisma.lead.count({
+        where: {
+          businessId,
+          status: "CONVERTED",
+          updatedAt: { gte: d, lt: nextD },
+        },
+      }),
+    ]);
+
+    monthsData.push({
+      month: d.toLocaleString("en-US", { month: "short" }),
+      date: d.toISOString(),
+      leads: leadCount,
+      converted: convertedCount,
+    });
+  }
+
+  // Top pending tasks for today/overdue
+  const todayTasks = await prisma.task.findMany({
+    where: {
+      lead: { businessId },
+      status: "PENDING",
+    },
+    take: 6,
+    orderBy: { dueAt: "asc" },
+    include: { lead: true },
+  });
+
+  // Most recent inbound leads
+  const recentLeads = await prisma.lead.findMany({
+    where: { businessId },
+    take: 8,
+    orderBy: { createdAt: "desc" },
+    include: {
+      tasks: {
+        take: 1,
+        where: { status: "PENDING" },
+      },
+    },
+  });
+
+  return {
+    monthlyFlow: monthsData,
+    todayTasks,
+    recentLeads,
+  };
+}
