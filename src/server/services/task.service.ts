@@ -293,6 +293,59 @@ export async function getDashboardActivityAndFlow(businessId: string) {
     });
   }
 
+  // 30-day daily flow
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+  const [leadsIn30Days, convertedIn30Days] = await Promise.all([
+    prisma.lead.findMany({
+      where: {
+        businessId,
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      select: { createdAt: true },
+    }),
+    prisma.lead.findMany({
+      where: {
+        businessId,
+        status: "CONVERTED",
+        updatedAt: { gte: thirtyDaysAgo },
+      },
+      select: { updatedAt: true },
+    }),
+  ]);
+
+  const dailyMap = new Map<string, { inbound: number; converted: number }>();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateKey = d.toISOString().split("T")[0];
+    dailyMap.set(dateKey, { inbound: 0, converted: 0 });
+  }
+
+  for (const l of leadsIn30Days) {
+    const key = l.createdAt.toISOString().split("T")[0];
+    const existing = dailyMap.get(key);
+    if (existing) {
+      existing.inbound += 1;
+    }
+  }
+
+  for (const c of convertedIn30Days) {
+    const key = c.updatedAt.toISOString().split("T")[0];
+    const existing = dailyMap.get(key);
+    if (existing) {
+      existing.converted += 1;
+    }
+  }
+
+  const dailyFlow = Array.from(dailyMap.entries()).map(([date, counts]) => ({
+    date,
+    inbound: counts.inbound,
+    converted: counts.converted,
+  }));
+
   // Top pending tasks for today/overdue
   const todayTasks = await prisma.task.findMany({
     where: {
@@ -319,6 +372,7 @@ export async function getDashboardActivityAndFlow(businessId: string) {
 
   return {
     monthlyFlow: monthsData,
+    dailyFlow,
     todayTasks,
     recentLeads,
   };
