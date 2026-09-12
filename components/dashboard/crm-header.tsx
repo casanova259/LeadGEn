@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, CheckSquare, Settings, Sparkles, Flame } from "lucide-react";
+import { Settings, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/toast";
 
 export function CrmHeader({
   businessName,
-  rescueCount,
   pendingTasks,
 }: {
   businessName: string;
-  rescueCount: number;
+  rescueCount?: number;
   pendingTasks: number;
 }) {
   const hour = new Date().getHours();
@@ -19,57 +18,69 @@ export function CrmHeader({
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-border/60">
+    <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 pb-4 border-b border-[var(--hairline)]">
       <div className="space-y-1">
-        <div className="flex items-center gap-2.5">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {greeting}, {businessName}
-          </h1>
-          {rescueCount > 0 ? (
-            <Badge
-              variant="outline"
-              className="border-orange-500/40 bg-orange-500/15 text-orange-400 gap-1 animate-pulse"
-            >
-              <Flame size={12} />
-              {rescueCount} Urgent {rescueCount === 1 ? "Lead" : "Leads"}
-            </Badge>
-          ) : (
-            <Badge
-              variant="outline"
-              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 gap-1"
-            >
-              <Sparkles size={12} />
-              Pipeline Healthy
-            </Badge>
-          )}
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Monitor incoming customer inquiries, rescue neglected deals, and drive daily follow-up momentum.
+        <h1 className="font-heading text-[28px] font-normal tracking-[-0.3px] text-[var(--ink)]">
+          {greeting}, {businessName}
+        </h1>
+        <p className="text-[13px] font-sans text-[var(--ink-muted)]">
+          Dispatch desk — real-time lead tracking and follow-up management
         </p>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
-        <Button asChild variant="outline" size="sm" className="h-8 text-xs gap-1.5 font-medium">
+      <div className="flex items-center gap-2.5 shrink-0">
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="h-8 rounded-[8px] border-[var(--hairline)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--surface-raised)] text-[13px] font-sans transition-colors focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)]"
+        >
           <Link href="/tasks">
-            <CheckSquare className="size-3.5" />
-            Outreach Tasks
+            Outreach tasks
             {pendingTasks > 0 && (
-              <span className="ml-1 rounded-full bg-primary/15 text-primary text-[10px] px-1.5 py-0.2 font-semibold">
-                {pendingTasks}
+              <span className="ml-1.5 font-mono text-[12px] text-[var(--ink-faint)]">
+                ({pendingTasks})
               </span>
             )}
           </Link>
         </Button>
 
-        <Button asChild size="sm" className="h-8 text-xs gap-1.5 font-medium shadow-xs">
-          <Link href="/leads/new">
-            <Plus className="size-3.5" />
-            New Lead
-          </Link>
+        <Button
+          asChild
+          size="sm"
+          className="h-8 rounded-[8px] bg-[var(--accent-blue)] text-[#0C0E11] hover:bg-[var(--accent-blue)]/90 text-[13px] font-sans font-medium transition-colors focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)]"
+        >
+          <Link href="/leads/new">+ New lead</Link>
         </Button>
 
-        <Button asChild variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground">
-          <Link href="/settings" title="Business Settings">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            toast({
+              message: "Dispatch Desk: Real-time toast system online",
+              state: "success",
+              action: {
+                label: "Undo",
+                run: () => toast("Action reversed"),
+              },
+            });
+          }}
+          className="h-8 rounded-[8px] border-[var(--hairline)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--surface-raised)] text-[13px] font-sans transition-colors focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)]"
+          title="Test toast notification"
+        >
+          <Bell className="size-3.5 mr-1.5 text-[var(--accent-blue)]" />
+          Test toast
+        </Button>
+
+        <Button
+          asChild
+          variant="ghost"
+          size="icon"
+          className="size-8 rounded-[8px] text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-raised)] transition-colors"
+        >
+          <Link href="/settings" title="Business settings">
             <Settings className="size-4" />
           </Link>
         </Button>

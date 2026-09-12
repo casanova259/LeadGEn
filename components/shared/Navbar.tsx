@@ -48,16 +48,16 @@ export function Navbar({
     quickCreateHref ? quickCreateLabel : routeConfig.quickCreateLabel ?? quickCreateLabel;
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-border bg-background px-8 text-foreground">
-      <h1 className="text-[18px] font-semibold tracking-[-0.2px]">{resolvedTitle}</h1>
+    <header className="flex h-16 items-center justify-between border-b border-[var(--hairline)] bg-[var(--surface)] px-8 text-[var(--ink)]">
+      <span className="font-heading text-[17px] font-normal text-[var(--ink)] tracking-tight">{resolvedTitle}</span>
 
       <div className="flex items-center gap-3">
         {resolvedQuickCreateHref && (
           <Link
             href={resolvedQuickCreateHref}
-            className="flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground transition hover:bg-primary/90"
+            className="flex h-8 items-center gap-1.5 rounded-[8px] bg-[var(--accent-blue)] px-3 text-[13px] font-sans font-medium text-[#0C0E11] transition hover:bg-[var(--accent-blue)]/90"
           >
-            <Plus size={14} strokeWidth={2.5} />
+            <Plus size={13} strokeWidth={2.5} />
             {resolvedQuickCreateLabel}
           </Link>
         )}

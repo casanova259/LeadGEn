@@ -5,8 +5,11 @@ import {
   getLeadAnalytics,
   getDashboardActivityAndFlow,
 } from "@/src/server/services/task.service";
-import { Dashboard } from "@/components/dashboard";
+import { CrmHeader } from "@/components/dashboard/crm-header";
+import { StatusRail } from "@/components/dashboard/status-rail";
+import { DispatchChart } from "@/components/dashboard/dispatch-chart";
 import { CrmActionCenter } from "@/components/dashboard/crm-action-center";
+import { CrmRecentLeads } from "@/components/dashboard/crm-recent-leads";
 import { OnboardingChecklist } from "@/components/shared/onboarding-checklist";
 
 export default async function DashboardPage() {
@@ -21,36 +24,44 @@ export default async function DashboardPage() {
   const totalLeads = stats.totalLeads;
 
   return (
-    <div className="min-h-screen space-y-8 p-6 max-w-7xl mx-auto">
-      {/* 1. Onboarding checklist for fresh accounts */}
+    <div className="min-h-screen space-y-6 p-6 max-w-7xl mx-auto bg-[var(--bg)] text-[var(--ink)]">
+      {/* 1. Header greeting & active action buttons */}
+      <CrmHeader
+        businessName={business.name}
+        rescueCount={rescueQueue.length}
+        pendingTasks={stats.pendingTasks}
+      />
+
+      {/* 2. Onboarding checklist for new accounts */}
       {totalLeads === 0 && (
         <OnboardingChecklist businessId={business.id} />
       )}
 
-      {/* 2. Signature @efferd/dashboard-1 Bento Grid Suite */}
-      <Dashboard
-        businessName={business.name}
-        stats={{
-          totalLeads: stats.totalLeads,
-          todaysLeads: stats.todaysLeads,
-          rescueCount: rescueQueue.length,
-          pendingTasks: stats.pendingTasks,
-          overdueTasks: stats.overdueTasks,
-          converted: stats.converted,
-          conversionRate: analytics.conversionRate,
-        }}
-        flowData={activityAndFlow.dailyFlow}
-        recentLeads={activityAndFlow.recentLeads}
+      {/* 3. Status Rail: Single bordered container with 3 columns & real status ticks */}
+      <StatusRail
+        totalLeads={stats.totalLeads}
+        todaysLeads={stats.todaysLeads}
+        rescueCount={rescueQueue.length}
+        conversionRate={analytics.conversionRate}
+        converted={stats.converted}
       />
 
-      {/* 3. Daily Outreach Cockpit (1-Click Calls, Emails, Snooze & Rescue Priority) */}
-      <div className="pt-2">
-        <CrmActionCenter
-          rescueQueue={rescueQueue}
-          todayTasks={activityAndFlow.todayTasks}
-          completedToday={stats.completedToday}
-        />
-      </div>
+      {/* 4. Inbound Flow Chart: Area chart with plain-language trend & real current data */}
+      <DispatchChart
+        dailyFlow={activityAndFlow.dailyFlow}
+        trendDescription={activityAndFlow.trendDescription}
+        totalInPeriod={stats.totalLeads}
+      />
+
+      {/* 5. Rescue Queue Spotlight & Outreach Task Velocity */}
+      <CrmActionCenter
+        rescueQueue={rescueQueue}
+        todayTasks={activityAndFlow.todayTasks}
+        completedToday={stats.completedToday}
+      />
+
+      {/* 6. Recent Inbound Opportunities Table */}
+      <CrmRecentLeads leads={activityAndFlow.recentLeads} />
     </div>
   );
 }

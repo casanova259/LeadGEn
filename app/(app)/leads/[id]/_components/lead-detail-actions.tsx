@@ -1,8 +1,11 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { LeadStatus, LeadPriority } from "@prisma/client";
 import { markContactedAction, updateLeadAction, deleteLeadAction } from "@/src/server/actions/lead.actions";
+import { completeTaskAction } from "@/src/server/actions/task.action";
+import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Phone, Mail, MessageSquare, CheckCircle, Trash2, Loader2, Flame } from "lucide-react";
 
@@ -136,5 +139,58 @@ export function LeadDetailActions({
         <Trash2 className="size-3.5" />
       </Button>
     </div>
+  );
+}
+
+export function LeadTaskDoneButton({
+  taskId,
+  leadName,
+}: {
+  taskId: string;
+  leadName: string;
+}) {
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
+
+  if (isCompleted) {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs text-emerald-500 font-medium">
+        <CheckCircle className="size-3.5" />
+        Completed
+      </span>
+    );
+  }
+
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      disabled={isPending}
+      onClick={async () => {
+        setIsPending(true);
+        setIsCompleted(true);
+        toast({
+          message: `Follow-up completed for ${leadName}`,
+          state: "success",
+        });
+        try {
+          await completeTaskAction(taskId);
+          router.refresh();
+        } catch (err: any) {
+          setIsCompleted(false);
+          toast({
+            message: `Failed to complete task: ${err?.message || "Server error"}`,
+            state: "error",
+          });
+        } finally {
+          setIsPending(false);
+        }
+      }}
+      className="h-8 text-xs gap-1 cursor-pointer"
+    >
+      <CheckCircle className="size-3.5" />
+      Mark Done
+    </Button>
   );
 }

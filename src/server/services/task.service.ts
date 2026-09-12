@@ -293,58 +293,110 @@ export async function getDashboardActivityAndFlow(businessId: string) {
     });
   }
 
-  // 30-day daily flow
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
-  thirtyDaysAgo.setHours(0, 0, 0, 0);
+  // Real daily flow: only plot real, current data up to today (no future days, no long flat baseline)
+  const nowDay = new Date();
+  nowDay.setHours(23, 59, 59, 999);
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
+  fourteenDaysAgo.setHours(0, 0, 0, 0);
 
-  const [leadsIn30Days, convertedIn30Days] = await Promise.all([
-    prisma.lead.findMany({
-      where: {
-        businessId,
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      select: { createdAt: true },
-    }),
-    prisma.lead.findMany({
-      where: {
-        businessId,
-        status: "CONVERTED",
-        updatedAt: { gte: thirtyDaysAgo },
-      },
-      select: { updatedAt: true },
-    }),
-  ]);
+  const leadsInWindow = await prisma.lead.findMany({
+    where: {
+      businessId,
+      createdAt: { gte: fourteenDaysAgo, lte: nowDay },
+    },
+    select: { createdAt: true },
+    orderBy: { createdAt: "asc" },
+  });
 
-  const dailyMap = new Map<string, { inbound: number; converted: number }>();
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const dateKey = d.toISOString().split("T")[0];
-    dailyMap.set(dateKey, { inbound: 0, converted: 0 });
+  let dailyFlow: {
+    date: string;
+    label: string;
+    inbound: number;
+    isToday: boolean;
+  }[] = [];
+
+  if (leadsInWindow.length > 0) {
+    // Find the first date with data in this window or at least 5 days ago to give context
+    const firstDateWithData = new Date(leadsInWindow[0].createdAt);
+    firstDateWithData.setHours(0, 0, 0, 0);
+
+    // Don't start earlier than 7 days ago if first lead was recently created
+    const startDate = new Date(
+      Math.max(
+        firstDateWithData.getTime(),
+        new Date().setDate(new Date().getDate() - 6)
+      )
+    );
+    startDate.setHours(0, 0, 0, 0);
+
+    const todayDateStr = new Date().toISOString().split("T")[0];
+    const map = new Map<string, number>();
+
+    // Fill days from startDate to today ONLY (strictly never future dates)
+    const current = new Date(startDate);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+
+    while (current <= today) {
+      const key = current.toISOString().split("T")[0];
+      map.set(key, 0);
+      current.setDate(current.getDate() + 1);
+    }
+
+    for (const lead of leadsInWindow) {
+      const key = lead.createdAt.toISOString().split("T")[0];
+      if (map.has(key)) {
+        map.set(key, (map.get(key) || 0) + 1);
+      }
+    }
+
+    dailyFlow = Array.from(map.entries()).map(([dateStr, count]) => {
+      const d = new Date(dateStr + "T12:00:00Z");
+      const label = d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      return {
+        date: dateStr,
+        label,
+        inbound: count,
+        isToday: dateStr === todayDateStr,
+      };
+    });
   }
 
-  for (const l of leadsIn30Days) {
-    const key = l.createdAt.toISOString().split("T")[0];
-    const existing = dailyMap.get(key);
-    if (existing) {
-      existing.inbound += 1;
+  // Calculate plain language trend summary
+  let trendDescription = "No recent inquiries recorded";
+  if (dailyFlow.length > 0) {
+    const totalInWindow = dailyFlow.reduce((sum, d) => sum + d.inbound, 0);
+    if (totalInWindow === 0) {
+      trendDescription = "No inquiries recorded over recent days";
+    } else if (dailyFlow.length >= 3) {
+      const recent = dailyFlow.slice(-2);
+      const prior = dailyFlow.slice(-4, -2);
+      const recentSum = recent.reduce((sum, d) => sum + d.inbound, 0);
+      const priorSum = prior.reduce((sum, d) => sum + d.inbound, 0);
+
+      if (recentSum === 0 && priorSum >= 2) {
+        const lastActive = [...dailyFlow].reverse().find((d) => d.inbound > 0);
+        const dayName = lastActive
+          ? new Date(lastActive.date + "T12:00:00Z").toLocaleDateString("en-US", {
+              weekday: "long",
+            })
+          : "earlier";
+        trendDescription = `Inflow has slowed sharply since ${dayName}`;
+      } else if (recentSum > priorSum && priorSum > 0) {
+        trendDescription = "Inflow is accelerating over the past few days";
+      } else if (recentSum === priorSum && recentSum > 0) {
+        trendDescription = "Inflow has held steady across recent days";
+      } else {
+        trendDescription = `${totalInWindow} inquiries recorded over active period`;
+      }
+    } else {
+      trendDescription = `${totalInWindow} inquiries recorded recently`;
     }
   }
-
-  for (const c of convertedIn30Days) {
-    const key = c.updatedAt.toISOString().split("T")[0];
-    const existing = dailyMap.get(key);
-    if (existing) {
-      existing.converted += 1;
-    }
-  }
-
-  const dailyFlow = Array.from(dailyMap.entries()).map(([date, counts]) => ({
-    date,
-    inbound: counts.inbound,
-    converted: counts.converted,
-  }));
 
   // Top pending tasks for today/overdue
   const todayTasks = await prisma.task.findMany({
@@ -373,6 +425,7 @@ export async function getDashboardActivityAndFlow(businessId: string) {
   return {
     monthlyFlow: monthsData,
     dailyFlow,
+    trendDescription,
     todayTasks,
     recentLeads,
   };

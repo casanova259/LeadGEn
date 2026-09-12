@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TaskType, TaskStatus, LeadPriority } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/toast";
 import {
   completeTaskAction,
   rescheduleTaskAction,
@@ -48,25 +50,40 @@ interface TaskRowProps {
 }
 
 export function TaskRow({ task }: TaskRowProps) {
+  const router = useRouter();
   const [isPending, setIsPending] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(task.status === "COMPLETED");
   const [showSnoozeMenu, setShowSnoozeMenu] = useState(false);
 
   const due = new Date(task.dueAt);
   const now = new Date();
-  const isOverdue = task.status === "PENDING" && due < now;
+  const isOverdue = !isCompleted && due < now;
 
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const endOfToday = new Date();
   endOfToday.setHours(23, 59, 59, 999);
-  const isDueToday = task.status === "PENDING" && due >= startOfToday && due <= endOfToday;
+  const isDueToday = !isCompleted && due >= startOfToday && due <= endOfToday;
 
   const handleComplete = async () => {
+    if (isCompleted || isPending) return;
     setIsPending(true);
+    setIsCompleted(true);
+    toast({
+      message: `Follow-up completed for ${task.lead.name}`,
+      state: "success",
+    });
+
     try {
       await completeTaskAction(task.id);
-    } catch (err) {
+      router.refresh();
+    } catch (err: any) {
+      setIsCompleted(false);
       console.error("Failed to complete task", err);
+      toast({
+        message: `Failed to complete task: ${err?.message || "Server error"}`,
+        state: "error",
+      });
     } finally {
       setIsPending(false);
     }
@@ -75,11 +92,21 @@ export function TaskRow({ task }: TaskRowProps) {
   const handleSnooze = async (hours: number) => {
     setIsPending(true);
     setShowSnoozeMenu(false);
+    toast({
+      message: `Task rescheduled (+${hours}h)`,
+      state: "info",
+    });
+
     try {
       const newDue = new Date(Date.now() + hours * 60 * 60 * 1000);
       await rescheduleTaskAction(task.id, newDue.toISOString());
-    } catch (err) {
+      router.refresh();
+    } catch (err: any) {
       console.error("Failed to reschedule task", err);
+      toast({
+        message: `Failed to reschedule task: ${err?.message || "Server error"}`,
+        state: "error",
+      });
     } finally {
       setIsPending(false);
     }
@@ -89,10 +116,20 @@ export function TaskRow({ task }: TaskRowProps) {
     if (!confirm("Are you sure you want to delete this task?")) return;
     setIsPending(true);
     setShowSnoozeMenu(false);
+    toast({
+      message: "Task deleted",
+      state: "info",
+    });
+
     try {
       await deleteTaskAction(task.id);
-    } catch (err) {
+      router.refresh();
+    } catch (err: any) {
       console.error("Failed to delete task", err);
+      toast({
+        message: `Failed to delete task: ${err?.message || "Server error"}`,
+        state: "error",
+      });
     } finally {
       setIsPending(false);
     }
@@ -103,11 +140,11 @@ export function TaskRow({ task }: TaskRowProps) {
 
   // Format relative due label
   const formatDueLabel = () => {
-    if (task.status === "COMPLETED") {
+    if (isCompleted) {
       return (
         <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-medium">
           <CheckCircle2 className="size-3.5" />
-          Completed {task.completedAt ? new Date(task.completedAt).toLocaleDateString() : ""}
+          Completed {task.completedAt ? new Date(task.completedAt).toLocaleDateString() : "Just now"}
         </span>
       );
     }
@@ -176,18 +213,18 @@ export function TaskRow({ task }: TaskRowProps) {
     <div
       className={`group flex flex-col sm:flex-row sm:items-center justify-between p-3.5 sm:px-4 sm:py-3.5 transition-colors border-b last:border-b-0 hover:bg-muted/40 ${
         isOverdue ? "bg-red-500/[0.02]" : ""
-      } ${task.status === "COMPLETED" ? "opacity-60" : ""}`}
+      } ${isCompleted ? "opacity-60" : ""}`}
     >
       {/* Left section: Checkbox & Info */}
       <div className="flex items-start gap-3 min-w-0">
         <button
           type="button"
           onClick={handleComplete}
-          disabled={isPending || task.status === "COMPLETED"}
-          className="mt-0.5 shrink-0 text-muted-foreground hover:text-primary transition-colors focus:outline-hidden"
-          title={task.status === "COMPLETED" ? "Completed" : "Click to mark done"}
+          disabled={isPending || isCompleted}
+          className="mt-0.5 shrink-0 text-muted-foreground hover:text-primary transition-colors focus:outline-hidden cursor-pointer"
+          title={isCompleted ? "Completed" : "Click to mark done"}
         >
-          {task.status === "COMPLETED" ? (
+          {isCompleted ? (
             <CheckCircle2 className="size-5 text-emerald-500 fill-emerald-500/20" />
           ) : (
             <Circle className="size-5 hover:stroke-primary" />
@@ -199,7 +236,7 @@ export function TaskRow({ task }: TaskRowProps) {
             <Link
               href={`/leads/${task.leadId}`}
               className={`font-medium hover:underline text-sm truncate flex items-center gap-1 ${
-                task.status === "COMPLETED" ? "line-through text-muted-foreground" : "text-foreground"
+                isCompleted ? "line-through text-muted-foreground" : "text-foreground"
               }`}
             >
               {task.lead.name}
@@ -303,7 +340,7 @@ export function TaskRow({ task }: TaskRowProps) {
         )}
 
         {/* Snooze / Reschedule Dropdown */}
-        {task.status === "PENDING" && (
+        {!isCompleted && (
           <div className="relative">
             <Button
               size="xs"

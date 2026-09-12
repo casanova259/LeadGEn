@@ -3,11 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Lead } from "@prisma/client";
-import { Search, ArrowRight, Flame, ExternalLink, MessageSquare, Phone } from "lucide-react";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Search, Flame, ExternalLink, MessageSquare, Phone } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -24,13 +21,13 @@ function cleanPhoneNumber(phone?: string | null) {
   return phone.replace(/[^\d+]/g, "");
 }
 
-const STATUS_BADGES: Record<string, { label: string; className: string }> = {
-  NEW: { label: "New", className: "border-blue-500/30 bg-blue-500/10 text-blue-400" },
-  CONTACTED: { label: "Contacted", className: "border-amber-500/30 bg-amber-500/10 text-amber-400" },
-  FOLLOW_UP: { label: "Follow Up", className: "border-purple-500/30 bg-purple-500/10 text-purple-400" },
-  QUALIFIED: { label: "Qualified", className: "border-indigo-500/30 bg-indigo-500/10 text-indigo-400" },
-  CONVERTED: { label: "Converted 🎉", className: "border-emerald-500/30 bg-emerald-500/15 text-emerald-400 font-medium" },
-  LOST: { label: "Lost", className: "border-zinc-500/30 bg-zinc-500/10 text-zinc-400" },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  NEW: { label: "New", color: "var(--accent-blue)", bg: "rgba(124, 156, 217, 0.12)" },
+  CONTACTED: { label: "Contacted", color: "var(--attention)", bg: "rgba(232, 163, 61, 0.12)" },
+  FOLLOW_UP: { label: "Follow up", color: "var(--ink-muted)", bg: "rgba(139, 144, 152, 0.12)" },
+  QUALIFIED: { label: "Qualified", color: "var(--clear)", bg: "rgba(94, 200, 176, 0.12)" },
+  CONVERTED: { label: "Converted", color: "var(--clear)", bg: "rgba(94, 200, 176, 0.15)" },
+  LOST: { label: "Lost", color: "var(--ink-faint)", bg: "rgba(86, 92, 100, 0.15)" },
 };
 
 export function CrmRecentLeads({ leads }: { leads: Lead[] }) {
@@ -51,180 +48,190 @@ export function CrmRecentLeads({ leads }: { leads: Lead[] }) {
   }, [leads, search, statusFilter]);
 
   return (
-    <Card className="xl:col-span-12">
-      <CardHeader>
+    <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--surface)] p-6">
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 pb-4 border-b border-[var(--hairline)]">
         <div>
-          <CardTitle>Recent Inbound Opportunities</CardTitle>
-          <CardDescription>
-            Live stream of customer inquiries captured across your forms, WhatsApp, and campaigns.
-          </CardDescription>
+          <h2 className="font-heading text-[18px] font-normal text-[var(--ink)] tracking-tight">
+            Recent opportunities
+          </h2>
+          <p className="text-[13px] font-sans text-[var(--ink-muted)] mt-0.5">
+            Customer inquiries captured across website forms, WhatsApp, and ad campaigns.
+          </p>
         </div>
 
-        <CardAction>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Filter by name, phone..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-8 w-44 pl-8 text-xs md:w-56"
-              />
-            </div>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-8 w-32 text-xs">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Statuses</SelectItem>
-                <SelectItem value="NEW">New</SelectItem>
-                <SelectItem value="CONTACTED">Contacted</SelectItem>
-                <SelectItem value="FOLLOW_UP">Follow Up</SelectItem>
-                <SelectItem value="QUALIFIED">Qualified</SelectItem>
-                <SelectItem value="CONVERTED">Converted</SelectItem>
-                <SelectItem value="LOST">Lost</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button asChild size="sm" variant="outline" className="h-8 text-xs gap-1">
-              <Link href="/leads">
-                View All
-                <ArrowRight className="size-3" />
-              </Link>
-            </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--ink-faint)]" />
+            <Input
+              placeholder="Search leads..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-8 w-40 pl-8 font-sans text-xs rounded-[6px] border-[var(--hairline)] bg-[var(--surface-raised)] text-[var(--ink)] placeholder:text-[var(--ink-faint)] md:w-48"
+            />
           </div>
-        </CardAction>
-      </CardHeader>
 
-      <CardContent className="px-0 pb-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/40">
-              <TableRow>
-                <TableHead className="pl-6 text-xs font-semibold">Lead Contact</TableHead>
-                <TableHead className="text-xs font-semibold">Channel Source</TableHead>
-                <TableHead className="text-xs font-semibold">Status</TableHead>
-                <TableHead className="text-xs font-semibold">Priority</TableHead>
-                <TableHead className="text-xs font-semibold">Captured</TableHead>
-                <TableHead className="pr-6 text-right text-xs font-semibold">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredLeads.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-28 text-center text-xs text-muted-foreground">
-                    No leads found matching your search.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredLeads.map((lead) => {
-                  const statusInfo = STATUS_BADGES[lead.status] || {
-                    label: lead.status,
-                    className: "border-border bg-muted text-muted-foreground",
-                  };
-                  const phoneClean = cleanPhoneNumber(lead.phone);
-                  const waUrl = phoneClean
-                    ? `https://wa.me/${phoneClean.replace("+", "")}?text=${encodeURIComponent(
-                        `Hi ${lead.name}, following up regarding your inquiry!`
-                      )}`
-                    : null;
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-8 w-32 font-sans text-xs rounded-[6px] border-[var(--hairline)] bg-[var(--surface-raised)] text-[var(--ink)]">
+              <SelectValue placeholder="All statuses" />
+            </SelectTrigger>
+            <SelectContent className="rounded-[8px] border-[var(--hairline)] bg-[var(--surface-raised)] text-[var(--ink)]">
+              <SelectItem value="ALL">All statuses</SelectItem>
+              <SelectItem value="NEW">New</SelectItem>
+              <SelectItem value="CONTACTED">Contacted</SelectItem>
+              <SelectItem value="FOLLOW_UP">Follow up</SelectItem>
+              <SelectItem value="QUALIFIED">Qualified</SelectItem>
+              <SelectItem value="CONVERTED">Converted</SelectItem>
+              <SelectItem value="LOST">Lost</SelectItem>
+            </SelectContent>
+          </Select>
 
-                  return (
-                    <TableRow key={lead.id} className="hover:bg-muted/30 transition-colors">
-                      <TableCell className="pl-6 py-3 font-medium">
-                        <div className="flex flex-col">
-                          <Link
-                            href={`/leads/${lead.id}`}
-                            className="text-foreground hover:underline font-semibold text-sm flex items-center gap-1.5"
-                          >
-                            {lead.name}
-                            <ExternalLink className="size-3 text-muted-foreground opacity-70" />
-                          </Link>
-                          <span className="text-xs text-muted-foreground font-normal">
-                            {lead.phone || lead.email || "No contact info"}
-                          </span>
-                        </div>
-                      </TableCell>
-
-                      <TableCell className="py-3">
-                        <Badge variant="outline" className="text-[11px] uppercase tracking-wide">
-                          {lead.source.replace("_", " ")}
-                        </Badge>
-                      </TableCell>
-
-                      <TableCell className="py-3">
-                        <Badge variant="outline" className={`text-[11px] ${statusInfo.className}`}>
-                          {statusInfo.label}
-                        </Badge>
-                      </TableCell>
-
-                      <TableCell className="py-3">
-                        {lead.priority === "HOT" ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 border border-red-500/20 px-2 py-0.5 text-[11px] font-semibold text-red-400">
-                            <Flame size={11} />
-                            HOT
-                          </span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">Normal</span>
-                        )}
-                      </TableCell>
-
-                      <TableCell className="py-3 text-xs text-muted-foreground">
-                        {formatRelative(lead.createdAt)}
-                      </TableCell>
-
-                      <TableCell className="pr-6 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {waUrl && (
-                            <Button
-                              asChild
-                              size="icon"
-                              variant="ghost"
-                              className="size-7 text-emerald-500 hover:bg-emerald-500/10"
-                              title="Chat on WhatsApp"
-                            >
-                              <a href={waUrl} target="_blank" rel="noopener noreferrer">
-                                <MessageSquare className="size-3.5" />
-                              </a>
-                            </Button>
-                          )}
-                          {lead.phone && (
-                            <Button
-                              asChild
-                              size="icon"
-                              variant="ghost"
-                              className="size-7 text-blue-400 hover:bg-blue-500/10"
-                              title="Call phone"
-                            >
-                              <a href={`tel:${lead.phone}`}>
-                                <Phone className="size-3.5" />
-                              </a>
-                            </Button>
-                          )}
-                          <Button asChild size="sm" variant="outline" className="h-7 text-xs">
-                            <Link href={`/leads/${lead.id}`}>View</Link>
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        <div className="flex items-center justify-between border-t border-border px-6 py-3 text-xs text-muted-foreground">
-          <span>
-            Viewing {filteredLeads.length} of {leads.length} recent opportunities
-          </span>
-          <Link href="/leads" className="text-primary hover:underline font-medium flex items-center gap-1">
-            Open Full Leads CRM
-            <ArrowRight className="size-3" />
+          <Link
+            href="/leads"
+            className="text-[13px] font-sans text-[var(--accent-blue)] hover:underline ml-1"
+          >
+            View all
           </Link>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div className="overflow-x-auto pt-2">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-[var(--hairline)] hover:bg-transparent">
+              <TableHead className="font-sans text-[12px] font-medium text-[var(--ink-muted)] pl-0">
+                Lead contact
+              </TableHead>
+              <TableHead className="font-sans text-[12px] font-medium text-[var(--ink-muted)]">
+                Channel
+              </TableHead>
+              <TableHead className="font-sans text-[12px] font-medium text-[var(--ink-muted)]">
+                Status
+              </TableHead>
+              <TableHead className="font-sans text-[12px] font-medium text-[var(--ink-muted)]">
+                Captured
+              </TableHead>
+              <TableHead className="font-sans text-[12px] font-medium text-[var(--ink-muted)] text-right pr-0">
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredLeads.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={5} className="h-24 text-center font-sans text-[13px] text-[var(--ink-muted)]">
+                  No inquiries match the current filter.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredLeads.map((lead) => {
+                const status = STATUS_CONFIG[lead.status] || {
+                  label: lead.status,
+                  color: "var(--ink-muted)",
+                  bg: "transparent",
+                };
+                const phoneClean = cleanPhoneNumber(lead.phone);
+                const waUrl = phoneClean
+                  ? `https://wa.me/${phoneClean.replace("+", "")}?text=${encodeURIComponent(
+                      `Hi ${lead.name}, following up regarding your inquiry!`
+                    )}`
+                  : null;
+
+                return (
+                  <TableRow
+                    key={lead.id}
+                    className="border-b border-[var(--hairline)] hover:bg-[var(--surface-raised)]/40 transition-colors"
+                  >
+                    <TableCell className="py-3 pl-0">
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-1.5">
+                          <Link
+                            href={`/leads/${lead.id}`}
+                            className="font-sans font-medium text-[13px] text-[var(--ink)] hover:underline"
+                          >
+                            {lead.name}
+                          </Link>
+                          {lead.priority === "HOT" && (
+                            <span className="flex items-center gap-0.5 text-[11px] font-mono text-[var(--urgent)]">
+                              <Flame size={10} />
+                              Hot
+                            </span>
+                          )}
+                        </div>
+                        <span className="font-mono text-[11px] text-[var(--ink-muted)]">
+                          {lead.phone || lead.email || "No direct contact"}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="py-3">
+                      <span className="font-sans text-[12px] text-[var(--ink-muted)]">
+                        {lead.source.toLowerCase().replace("_", " ")}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="py-3">
+                      <span
+                        className="inline-flex items-center rounded-[4px] px-2 py-0.5 font-sans text-[11px] font-medium"
+                        style={{ color: status.color, backgroundColor: status.bg }}
+                      >
+                        {status.label}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="py-3 font-mono text-[12px] text-[var(--ink-muted)]">
+                      {formatRelative(lead.createdAt)}
+                    </TableCell>
+
+                    <TableCell className="py-3 text-right pr-0">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {waUrl && (
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center size-7 rounded-[4px] text-[var(--clear)] hover:bg-[var(--surface-raised)]"
+                            title="Chat on WhatsApp"
+                          >
+                            <MessageSquare className="size-3.5" />
+                          </a>
+                        )}
+                        {lead.phone && (
+                          <a
+                            href={`tel:${lead.phone}`}
+                            className="inline-flex items-center justify-center size-7 rounded-[4px] text-[var(--accent-blue)] hover:bg-[var(--surface-raised)]"
+                            title="Call phone"
+                          >
+                            <Phone className="size-3.5" />
+                          </a>
+                        )}
+                        <Link
+                          href={`/leads/${lead.id}`}
+                          className="inline-flex items-center justify-center h-7 px-2 font-sans text-[12px] text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-raised)] rounded-[4px]"
+                        >
+                          View
+                        </Link>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="flex items-center justify-between pt-4 text-[12px] font-sans text-[var(--ink-muted)]">
+        <span>
+          Viewing <strong className="font-mono text-[var(--ink)]">{filteredLeads.length}</strong> of{" "}
+          <strong className="font-mono text-[var(--ink)]">{leads.length}</strong> inquiries
+        </span>
+        <Link
+          href="/leads"
+          className="text-[var(--accent-blue)] hover:underline font-medium"
+        >
+          Open lead registry →
+        </Link>
+      </div>
+    </div>
   );
 }

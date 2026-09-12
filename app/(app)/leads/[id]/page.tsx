@@ -2,8 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrCreateBusiness } from "@/src/server/services/business.service";
 import { getLead } from "@/src/server/services/lead.service";
-import { completeTaskAction } from "@/src/server/actions/task.action";
-import { LeadDetailActions } from "./_components/lead-detail-actions";
+import { LeadDetailActions, LeadTaskDoneButton } from "./_components/lead-detail-actions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -217,17 +216,7 @@ export default async function LeadDetailPage({
                         </div>
 
                         {task.status === "PENDING" ? (
-                          <form
-                            action={async () => {
-                              "use server";
-                              await completeTaskAction(task.id);
-                            }}
-                          >
-                            <Button size="sm" variant="outline" className="h-8 text-xs gap-1">
-                              <CheckCircle2 className="size-3.5" />
-                              Mark Done
-                            </Button>
-                          </form>
+                          <LeadTaskDoneButton taskId={task.id} leadName={lead.name} />
                         ) : (
                           <span className="inline-flex items-center gap-1 text-xs text-emerald-500 font-medium">
                             <CheckCircle2 className="size-3.5" />

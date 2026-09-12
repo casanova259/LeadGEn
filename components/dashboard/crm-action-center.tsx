@@ -1,6 +1,7 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lead, Task } from "@prisma/client";
 import {
@@ -9,16 +10,12 @@ import {
   MessageSquare,
   CheckCircle2,
   CalendarDays,
-  ArrowRight,
   ShieldCheck,
   Clock,
-  Sparkles,
   ExternalLink,
 } from "lucide-react";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { completeTaskAction } from "@/src/server/actions/task.action";
+import { toast } from "@/components/ui/toast";
 
 function hoursAgo(date: Date) {
   const hrs = Math.floor((Date.now() - new Date(date).getTime()) / 36e5);
@@ -42,75 +39,120 @@ export function CrmActionCenter({
   todayTasks: (Task & { lead: Lead })[];
   completedToday: number;
 }) {
-  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const [completedIds, setCompletedIds] = useState<string[]>([]);
+  const [optimisticCount, setOptimisticCount] = useState(completedToday);
 
-  // Daily target goal calculation (e.g., target 10 completed follow-ups/day)
+  useEffect(() => {
+    setOptimisticCount(completedToday);
+  }, [completedToday]);
+
+  const visibleTasks = todayTasks.filter((t) => !completedIds.includes(t.id));
+
+  // Daily target goal calculation (target 10 completed follow-ups/day)
   const dailyTarget = 10;
   const barCount = 20;
   const activeBars = Math.min(
     barCount,
-    Math.round((completedToday / dailyTarget) * barCount)
+    Math.round((optimisticCount / dailyTarget) * barCount)
   );
+
+  const handleDone = async (task: Task & { lead: Lead }) => {
+    // 1. Instant optimistic update
+    setCompletedIds((prev) => [...prev, task.id]);
+    setOptimisticCount((prev) => prev + 1);
+
+    // 2. Immediate feedback toast
+    toast({
+      message: `Follow-up completed for ${task.lead.name}`,
+      state: "success",
+    });
+
+    // 3. Complete in DB
+    try {
+      await completeTaskAction(task.id);
+      router.refresh();
+    } catch (err: any) {
+      // Revert if error
+      setCompletedIds((prev) => prev.filter((id) => id !== task.id));
+      setOptimisticCount((prev) => Math.max(0, prev - 1));
+      toast({
+        message: `Could not complete task: ${err?.message || "Server error"}`,
+        state: "error",
+      });
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
       {/* 1. Rescue Queue Spotlight */}
-      <Card
-        className={`xl:col-span-7 flex flex-col justify-between ${
-          rescueQueue.length > 0 ? "border-orange-500/40 bg-orange-500/[0.02]" : ""
-        }`}
-      >
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <div
-              className={`flex size-7 items-center justify-center rounded-lg ${
-                rescueQueue.length > 0
-                  ? "bg-orange-500/15 text-orange-500"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              <Flame className="size-4" />
-            </div>
-            <div>
-              <CardTitle className="text-base flex items-center gap-2">
-                Rescue Queue
-                {rescueQueue.length > 0 && (
-                  <Badge
-                    variant="outline"
-                    className="border-orange-500/30 bg-orange-500/15 text-orange-400 text-[11px]"
-                  >
-                    {rescueQueue.length} Burning
-                  </Badge>
+      <div className="xl:col-span-7 flex flex-col justify-between rounded-[12px] border border-[var(--hairline)] bg-[var(--surface)] p-6">
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 pb-3 border-b border-[var(--hairline)]">
+            <div className="flex items-center gap-2">
+              <div
+                className="flex size-6 items-center justify-center rounded-[6px]"
+                style={{
+                  backgroundColor:
+                    rescueQueue.length > 0
+                      ? "rgba(217, 101, 79, 0.15)"
+                      : "rgba(94, 200, 176, 0.15)",
+                  color:
+                    rescueQueue.length > 0
+                      ? "var(--urgent)"
+                      : "var(--clear)",
+                }}
+              >
+                {rescueQueue.length > 0 ? (
+                  <Flame className="size-3.5" />
+                ) : (
+                  <ShieldCheck className="size-3.5" />
                 )}
-              </CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Hot leads untouched for over 24 hours. Contact them immediately to avoid losing the deal.
-              </p>
-            </div>
-          </div>
-          <CardAction>
-            <Button asChild variant="outline" size="sm" className="h-7 text-xs gap-1">
-              <Link href="/leads?priority=HOT">
-                View All Hot Leads
-                <ArrowRight className="size-3" />
-              </Link>
-            </Button>
-          </CardAction>
-        </CardHeader>
-
-        <CardContent className="pt-1">
-          {rescueQueue.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-background/50 p-8 text-center">
-              <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 mb-2">
-                <ShieldCheck className="size-5" />
               </div>
-              <p className="text-sm font-semibold text-foreground">Zero Abandoned Leads</p>
-              <p className="text-xs text-muted-foreground max-w-sm mt-1">
-                Every hot inquiry has had a touchpoint within the last 24 hours. The revenue safety net is active!
+              <h2 className="font-heading text-[18px] font-normal text-[var(--ink)] tracking-tight">
+                Rescue Queue
+              </h2>
+              <span
+                className="font-mono text-[12px] ml-1"
+                style={{
+                  color:
+                    rescueQueue.length > 0
+                      ? "var(--urgent)"
+                      : "var(--clear)",
+                }}
+              >
+                ({rescueQueue.length})
+              </span>
+            </div>
+
+            <Link
+              href="/leads?priority=HOT"
+              className="text-[13px] font-sans text-[var(--accent-blue)] hover:underline"
+            >
+              View all hot leads
+            </Link>
+          </div>
+
+          <p className="text-[13px] font-sans text-[var(--ink-muted)] mt-2 mb-4">
+            {rescueQueue.length === 0
+              ? "All hot leads have had a touchpoint within 24 hours. The safety net is clear."
+              : "Inquiries untouched over 24 hours. Reach out immediately to prevent lost deals."}
+          </p>
+
+          {rescueQueue.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-[8px] border border-dashed border-[var(--hairline)] bg-[var(--surface-raised)]/20 p-8 text-center">
+              <div className="flex size-9 items-center justify-center rounded-full bg-[var(--clear)]/10 text-[var(--clear)] mb-2">
+                <ShieldCheck className="size-4" />
+              </div>
+              <p className="text-[13px] font-sans font-medium text-[var(--ink)]">
+                Nothing waiting in rescue queue
+              </p>
+              <p className="text-[12px] font-sans text-[var(--ink-muted)] max-w-sm mt-0.5">
+                Every high-priority lead is followed up on schedule.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-border/60 rounded-xl border border-border/70 overflow-hidden bg-card/60">
+            <div className="divide-y divide-[var(--hairline)] rounded-[8px] border border-[var(--hairline)] overflow-hidden bg-[var(--surface-raised)]/40">
               {rescueQueue.slice(0, 4).map((lead) => {
                 const phoneClean = cleanPhoneNumber(lead.phone);
                 const waUrl = phoneClean
@@ -122,28 +164,25 @@ export function CrmActionCenter({
                 return (
                   <div
                     key={lead.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 gap-3 hover:bg-muted/40 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 gap-3 hover:bg-[var(--surface-raised)] transition-colors"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/leads/${lead.id}`}
-                          className="font-medium text-sm text-foreground hover:underline flex items-center gap-1.5"
+                          className="font-sans font-medium text-[14px] text-[var(--ink)] hover:underline flex items-center gap-1.5"
                         >
                           {lead.name}
-                          <ExternalLink className="size-3 text-muted-foreground" />
+                          <ExternalLink className="size-3 text-[var(--ink-muted)]" />
                         </Link>
-                        <Badge
-                          variant="outline"
-                          className="border-orange-500/30 bg-orange-500/10 text-orange-400 text-[10px] uppercase"
-                        >
+                        <span className="rounded-[4px] border border-[var(--hairline)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[10px] uppercase text-[var(--ink-muted)]">
                           {lead.source}
-                        </Badge>
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 text-[12px] font-mono text-[var(--ink-muted)]">
                         <span>{lead.phone || lead.email || "No direct phone"}</span>
                         <span>•</span>
-                        <span className="inline-flex items-center gap-1 text-orange-400 font-medium">
+                        <span className="inline-flex items-center gap-1 text-[var(--urgent)] font-mono">
                           <Clock className="size-3" />
                           {hoursAgo(lead.createdAt)}
                         </span>
@@ -153,163 +192,170 @@ export function CrmActionCenter({
                     {/* Quick 1-click rescue actions */}
                     <div className="flex items-center gap-2 shrink-0">
                       {waUrl && (
-                        <Button
-                          asChild
-                          size="sm"
-                          variant="outline"
-                          className="h-8 text-xs gap-1.5 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
+                        <a
+                          href={waUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() =>
+                            toast({
+                              message: `Opening WhatsApp chat with ${lead.name}`,
+                              state: "success",
+                            })
+                          }
+                          className="inline-flex items-center gap-1.5 h-7 rounded-[6px] border border-[var(--clear)]/30 bg-[var(--clear)]/10 px-2.5 text-[12px] font-sans text-[var(--clear)] hover:bg-[var(--clear)]/20 transition-colors"
                         >
-                          <a href={waUrl} target="_blank" rel="noopener noreferrer">
-                            <MessageSquare className="size-3.5 text-emerald-500" />
-                            WhatsApp
-                          </a>
-                        </Button>
+                          <MessageSquare className="size-3" />
+                          WhatsApp
+                        </a>
                       )}
 
                       {lead.phone && (
-                        <Button
-                          asChild
-                          size="sm"
-                          variant="outline"
-                          className="h-8 text-xs gap-1.5 hover:bg-blue-500/10 hover:text-blue-400"
+                        <a
+                          href={`tel:${lead.phone}`}
+                          onClick={() =>
+                            toast({
+                              message: `Initiating call to ${lead.name}`,
+                              state: "info",
+                            })
+                          }
+                          className="inline-flex items-center gap-1.5 h-7 rounded-[6px] border border-[var(--hairline)] bg-[var(--surface)] px-2.5 text-[12px] font-sans text-[var(--ink)] hover:bg-[var(--surface-raised)] transition-colors"
                         >
-                          <a href={`tel:${lead.phone}`}>
-                            <Phone className="size-3.5 text-blue-400" />
-                            Call
-                          </a>
-                        </Button>
+                          <Phone className="size-3 text-[var(--accent-blue)]" />
+                          Call
+                        </a>
                       )}
 
-                      <Button asChild size="sm" variant="ghost" className="h-8 text-xs">
-                        <Link href={`/leads/${lead.id}`}>Review</Link>
-                      </Button>
+                      <Link
+                        href={`/leads/${lead.id}`}
+                        className="inline-flex items-center h-7 rounded-[6px] px-2.5 text-[12px] font-sans text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-[var(--surface)] transition-colors"
+                      >
+                        Review
+                      </Link>
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* 2. Task Reminders & Follow-up Velocity */}
-      <Card className="xl:col-span-5 flex flex-col justify-between">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <CalendarDays className="size-4" />
-            </div>
-            <div>
-              <CardTitle className="text-base">Outreach Cockpit</CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Tasks due for customer outreach today.
-              </p>
-            </div>
-          </div>
-          <CardAction>
-            <Button asChild variant="outline" size="sm" className="h-7 text-xs gap-1">
-              <Link href="/tasks">
-                View All Tasks
-                <ArrowRight className="size-3" />
-              </Link>
-            </Button>
-          </CardAction>
-        </CardHeader>
-
-        <CardContent className="space-y-4 pt-1">
-          {/* Studio Admin Segmented Goal Bars */}
-          <div className="rounded-xl border border-border/60 bg-muted/30 p-3.5 space-y-2">
-            <div className="flex items-end justify-between">
-              <div className="space-y-0.5">
-                <span className="text-xs text-muted-foreground">Daily Outreach Velocity</span>
-                <div className="text-lg font-bold tracking-tight text-foreground">
-                  {completedToday}{" "}
-                  <span className="text-xs font-normal text-muted-foreground">
-                    of {dailyTarget} completed today
-                  </span>
-                </div>
+      {/* 2. Task Reminders & Daily Follow-up Velocity */}
+      <div className="xl:col-span-5 flex flex-col justify-between rounded-[12px] border border-[var(--hairline)] bg-[var(--surface)] p-6">
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 pb-3 border-b border-[var(--hairline)]">
+            <div className="flex items-center gap-2">
+              <div className="flex size-6 items-center justify-center rounded-[6px] bg-[var(--surface-raised)] text-[var(--accent-blue)]">
+                <CalendarDays className="size-3.5" />
               </div>
-              <span className="text-xs font-medium text-emerald-500">
-                {Math.round((completedToday / dailyTarget) * 100)}% Target
+              <h2 className="font-heading text-[18px] font-normal text-[var(--ink)] tracking-tight">
+                Outreach tasks
+              </h2>
+            </div>
+
+            <Link
+              href="/tasks"
+              className="text-[13px] font-sans text-[var(--accent-blue)] hover:underline"
+            >
+              View all tasks
+            </Link>
+          </div>
+
+          <p className="text-[13px] font-sans text-[var(--ink-muted)] mt-2 mb-4">
+            Follow-up actions scheduled for customer outreach today.
+          </p>
+
+          {/* Goal velocity bar */}
+          <div className="rounded-[8px] border border-[var(--hairline)] bg-[var(--surface-raised)]/30 p-3.5 space-y-2 mb-4">
+            <div className="flex items-baseline justify-between">
+              <span className="text-[12px] font-sans text-[var(--ink-muted)]">
+                Daily outreach velocity
+              </span>
+              <span className="font-mono text-[12px] text-[var(--clear)]">
+                {Math.round((optimisticCount / dailyTarget) * 100)}% target
               </span>
             </div>
 
-            {/* Segmented bar visual from template */}
-            <div className="flex h-5 w-full items-center gap-1 pt-1">
+            <div className="font-mono text-[20px] font-medium text-[var(--ink)] leading-none">
+              {optimisticCount}{" "}
+              <span className="text-[12px] font-sans font-normal text-[var(--ink-muted)]">
+                of {dailyTarget} completed today
+              </span>
+            </div>
+
+            {/* Segmented bar visual */}
+            <div className="flex h-3.5 w-full items-center gap-1 pt-1">
               {Array.from({ length: barCount }).map((_, index) => (
                 <div
                   key={index}
-                  className={`h-full flex-1 rounded-sm transition-colors ${
-                    index < activeBars
-                      ? "bg-primary shadow-xs"
-                      : "bg-muted-foreground/20"
-                  }`}
+                  className="h-full flex-1 rounded-xs transition-colors"
+                  style={{
+                    backgroundColor:
+                      index < activeBars
+                        ? "var(--accent-blue)"
+                        : "var(--hairline)",
+                  }}
                 />
               ))}
             </div>
           </div>
 
           {/* Pending tasks list */}
-          {todayTasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border/80 bg-background/50 p-6 text-center">
-              <Sparkles className="size-5 text-muted-foreground mb-1" />
-              <p className="text-xs font-medium text-foreground">All Follow-ups Complete</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                No pending tasks due today. Great work staying ahead!
+          {visibleTasks.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-[8px] border border-dashed border-[var(--hairline)] bg-[var(--surface-raised)]/20 p-6 text-center">
+              <p className="text-[13px] font-sans text-[var(--ink-muted)]">
+                All follow-ups complete for today.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-border/60 rounded-xl border border-border/70 overflow-hidden bg-card/60">
-              {todayTasks.slice(0, 3).map((task) => {
+            <div className="divide-y divide-[var(--hairline)] rounded-[8px] border border-[var(--hairline)] overflow-hidden bg-[var(--surface-raised)]/40">
+              {visibleTasks.slice(0, 3).map((task) => {
                 const isOverdue = new Date(task.dueAt) < new Date();
 
                 return (
                   <div
                     key={task.id}
-                    className="flex items-center justify-between p-3 gap-2 hover:bg-muted/40 transition-colors"
+                    className="flex items-center justify-between p-3 gap-2 hover:bg-[var(--surface-raised)] transition-colors"
                   >
                     <div className="space-y-0.5 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-xs text-foreground truncate">
+                        <span className="font-sans font-medium text-[13px] text-[var(--ink)] truncate">
                           {task.lead.name}
                         </span>
                         {isOverdue ? (
-                          <span className="text-[10px] font-semibold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">
+                          <span className="rounded-[4px] bg-[var(--urgent)]/15 px-1.5 py-0.5 font-mono text-[10px] text-[var(--urgent)]">
                             Overdue
                           </span>
                         ) : (
-                          <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                          <span className="rounded-[4px] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--ink-muted)]">
                             {task.type.replace("_", " ")}
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-muted-foreground truncate">
-                        Due: {new Date(task.dueAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} •{" "}
-                        {task.lead.phone || task.lead.email || "No phone"}
+                      <p className="text-[11px] font-mono text-[var(--ink-muted)] truncate">
+                        Due: {new Date(task.dueAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        • {task.lead.phone || task.lead.email || "No contact"}
                       </p>
                     </div>
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={isPending}
-                      onClick={() => {
-                        startTransition(async () => {
-                          await completeTaskAction(task.id);
-                        });
-                      }}
-                      className="h-7 text-xs gap-1 shrink-0 font-medium"
+                    <button
+                      type="button"
+                      onClick={() => handleDone(task)}
+                      className="inline-flex items-center gap-1 h-7 rounded-[6px] border border-[var(--hairline)] bg-[var(--surface)] px-2.5 text-[12px] font-sans text-[var(--ink)] hover:bg-[var(--surface-raised)] hover:border-[var(--clear)]/40 transition-colors shrink-0 cursor-pointer"
                     >
-                      <CheckCircle2 className="size-3 text-emerald-500" />
+                      <CheckCircle2 className="size-3 text-[var(--clear)]" />
                       Done
-                    </Button>
+                    </button>
                   </div>
                 );
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
