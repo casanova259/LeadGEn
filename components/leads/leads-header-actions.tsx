@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ImportLeadsDialog } from "./import-leads-dialog";
-import { Upload, Download, Plus } from "lucide-react";
+import { NewLeadDialog } from "./new-lead-dialog";
+import { Upload, Download, Plus, Kanban } from "lucide-react";
 
 export function LeadsHeaderActions() {
   const [importOpen, setImportOpen] = useState(false);
+  const [newLeadOpen, setNewLeadOpen] = useState(false);
   const searchParams = useSearchParams();
 
   const handleExport = () => {
@@ -29,6 +31,18 @@ export function LeadsHeaderActions() {
   return (
     <div className="flex items-center gap-2">
       <Button
+        asChild
+        variant="outline"
+        size="sm"
+        className="gap-1.5 text-xs h-9"
+      >
+        <Link href="/kanbanleads" title="Open Kanban Pipeline View">
+          <Kanban className="size-3.5" />
+          <span className="hidden sm:inline">Pipeline</span>
+        </Link>
+      </Button>
+
+      <Button
         variant="outline"
         size="sm"
         onClick={() => setImportOpen(true)}
@@ -48,13 +62,16 @@ export function LeadsHeaderActions() {
         <span>Export CSV</span>
       </Button>
 
-      <Button asChild size="sm" className="gap-1 text-xs h-9">
-        <Link href="/leads/new">
-          <Plus className="size-3.5" />
-          <span>New Lead</span>
-        </Link>
+      <Button
+        size="sm"
+        onClick={() => setNewLeadOpen(true)}
+        className="gap-1 text-xs h-9 cursor-pointer"
+      >
+        <Plus className="size-3.5" />
+        <span>New Lead</span>
       </Button>
 
+      <NewLeadDialog open={newLeadOpen} onOpenChange={setNewLeadOpen} />
       <ImportLeadsDialog open={importOpen} onOpenChange={setImportOpen} />
     </div>
   );

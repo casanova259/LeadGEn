@@ -14,22 +14,37 @@ type Option = { value: string; label: string };
 export function FormSelect({
   name,
   defaultValue,
+  value: controlledValue,
+  onValueChange,
   placeholder,
   options,
   required,
+  disabled,
 }: {
   name: string;
   defaultValue?: string;
+  value?: string;
+  onValueChange?: (val: string) => void;
   placeholder?: string;
   options: Option[];
   required?: boolean;
+  disabled?: boolean;
 }) {
-  const [value, setValue] = useState(defaultValue ?? "");
+  const [internalValue, setInternalValue] = useState(defaultValue ?? "");
+  const isControlled = controlledValue !== undefined;
+  const currentValue = isControlled ? controlledValue : internalValue;
+
+  const handleChange = (val: string) => {
+    if (!isControlled) {
+      setInternalValue(val);
+    }
+    onValueChange?.(val);
+  };
 
   return (
     <>
-      <input type="hidden" name={name} value={value} required={required} />
-      <Select value={value} onValueChange={setValue}>
+      <input type="hidden" name={name} value={currentValue} required={required} />
+      <Select value={currentValue} onValueChange={handleChange} disabled={disabled}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

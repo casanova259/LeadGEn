@@ -8,11 +8,13 @@ import {
   CheckSquare,
   Settings,
   Flame,
+  Kanban,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/leads", label: "Leads", icon: Users },
+  { href: "/kanbanleads", label: "Pipeline", icon: Kanban },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
   { href: "/settings", label: "Settings", icon: Settings },
 ];

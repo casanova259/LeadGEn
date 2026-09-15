@@ -13,9 +13,11 @@ import {
 
 export async function createLeadAction(input: Omit<CreateLeadInput, "businessId">) {
   const business = await getOrCreateBusiness();
-  await createLead({ ...input, businessId: business.id });
+  const lead = await createLead({ ...input, businessId: business.id });
   revalidatePath("/leads");
-  redirect("/leads");
+  revalidatePath("/dashboard");
+  revalidatePath("/tasks");
+  return lead;
 }
 
 export async function updateLeadAction(id: string, input: UpdateLeadInput) {

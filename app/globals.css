@@ -188,3 +188,22 @@
     font-family: var(--font-heading);
   }
 }
+
+@keyframes lead-highlight-flash {
+  0% {
+    background-color: color-mix(in srgb, var(--clear) 24%, transparent);
+    box-shadow: inset 3px 0 0 0 var(--clear);
+  }
+  60% {
+    background-color: color-mix(in srgb, var(--clear) 12%, transparent);
+    box-shadow: inset 3px 0 0 0 var(--clear);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: inset 3px 0 0 0 transparent;
+  }
+}
+
+.animate-lead-highlight {
+  animation: lead-highlight-flash 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}

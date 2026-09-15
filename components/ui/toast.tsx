@@ -11,6 +11,7 @@ import {
 } from 'react'
 import { AnimatePresence, motion, MotionConfig } from 'motion/react'
 
+import { X } from 'lucide-react'
 import { ALERT_MARKS, type AlertTone } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { StatusBadge } from '@/components/ui/spinner'
@@ -19,7 +20,7 @@ import { cn } from '@/lib/utils'
 
 const EVENT = 'kobra:toast'
 const DISMISS = 'kobra:toast-dismiss'
-const LIFETIME = 2400
+const LIFETIME = 4000
 
 const ACTION_LIFETIME = 6000
 const GAP = 8
@@ -182,9 +183,9 @@ function ToastLine({ message }: { message: string }) {
       animate={{ width: 'auto' }}
       exit={{ width: 0 }}
       transition={MORPH}
-      className="flex items-center overflow-hidden"
+      className="flex items-center overflow-hidden font-sans text-[13px] text-[var(--ink)]"
     >
-      <motion.span {...TEXT_SLIDE} transition={MORPH} className="w-max max-w-lg shrink-0 truncate">
+      <motion.span {...TEXT_SLIDE} transition={MORPH} className="w-max max-w-lg shrink-0">
         {message}
       </motion.span>
     </motion.div>
@@ -210,18 +211,28 @@ function ToastPill({
   behind: boolean
 }) {
   const pill = useRef<HTMLDivElement>(null)
+
+  const tickColor =
+    state === 'success'
+      ? 'var(--clear)'
+      : state === 'error'
+      ? 'var(--urgent)'
+      : state === 'warning'
+      ? 'var(--attention)'
+      : state === 'info'
+      ? 'var(--accent-blue)'
+      : 'var(--clear)'
+
   return (
     <motion.div
       ref={pill}
       style={{ borderRadius: 9999 }}
-
       drag={behind ? false : true}
       dragSnapToOrigin
       dragElastic={0.6}
       dragMomentum={false}
       dragTransition={{ bounceStiffness: 520, bounceDamping: 42 }}
       onDragEnd={(_, info) => {
-
         const far = Math.hypot(info.offset.x, info.offset.y) > SWIPE
         const fast = Math.hypot(info.velocity.x, info.velocity.y) > FLICK
         if (!far && !fast) return
@@ -230,21 +241,25 @@ function ToastPill({
         else onDismiss()
       }}
       className={cn(
-        'toast-pill relative flex max-w-lg overflow-hidden rounded-full border border-[var(--hairline)] bg-[var(--surface-raised)] text-sm text-[var(--ink)] shadow-2xl backdrop-blur-md',
+        'toast-pill relative flex max-w-lg items-center overflow-hidden rounded-full border border-[var(--hairline)] bg-[var(--surface-raised)] font-sans text-sm text-[var(--ink)] shadow-2xl backdrop-blur-md',
         behind ? 'pointer-events-none' : 'pointer-events-auto cursor-grab active:cursor-grabbing',
-
-        action ? 'py-1.5 pr-1.5' : 'py-2 pr-4',
-
-        state ? 'pl-3' : 'pl-4',
+        action ? 'py-1.5 pr-2' : 'py-2 pr-2.5',
+        state ? 'pl-4' : 'pl-4',
       )}
     >
+      {/* Left accent tick in status rail pattern */}
+      <div
+        className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r pointer-events-none"
+        style={{ backgroundColor: tickColor }}
+        aria-hidden="true"
+      />
+
       <motion.div
         animate={{ opacity: behind ? 0 : 1 }}
         transition={MORPH}
         className="flex items-center"
       >
         <div className="flex items-center gap-2">
-
           <AnimatePresence initial={false} mode="popLayout">
             {state ? (
               <motion.span
@@ -271,12 +286,11 @@ function ToastPill({
               key="action"
               initial={{ width: 0 }}
               animate={{ width: 'auto', height: 'auto' }}
-
               exit={{ width: 0, height: TEXT_LINE }}
               transition={MORPH}
               className="flex items-center overflow-hidden"
             >
-              <div className="w-max pl-7">
+              <div className="w-max pl-4">
                 <Button type="button" size="sm" onClick={onAction} className="h-7 rounded-full">
                   {action.label}
                 </Button>
@@ -284,6 +298,19 @@ function ToastPill({
             </motion.div>
           ) : null}
         </AnimatePresence>
+
+        {/* Early dismiss X button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onDismiss()
+          }}
+          aria-label="Dismiss notification"
+          className="ml-2 inline-flex size-5 shrink-0 items-center justify-center rounded-full text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-white/10 transition-colors cursor-pointer"
+        >
+          <X className="size-3.5" />
+        </button>
       </motion.div>
     </motion.div>
   )
@@ -423,6 +450,7 @@ function ToastStack({
   return (
     <motion.div
       ref={root}
+      role="status"
       aria-live="polite"
 
       onPointerDown={() => setHolding(true)}

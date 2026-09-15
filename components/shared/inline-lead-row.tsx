@@ -7,6 +7,7 @@ import { updateLeadAction } from "@/src/server/actions/lead.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pencil, Check, X, Loader2, Flame, Phone, Mail, FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type SerializedLead = {
   id: string;
@@ -29,7 +30,13 @@ const STATUS_COLORS: Record<LeadStatus, string> = {
   LOST: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
 };
 
-export function InlineLeadRow({ lead }: { lead: SerializedLead }) {
+export function InlineLeadRow({
+  lead,
+  isHighlighted = false,
+}: {
+  lead: SerializedLead;
+  isHighlighted?: boolean;
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -178,7 +185,13 @@ export function InlineLeadRow({ lead }: { lead: SerializedLead }) {
   }
 
   return (
-    <div className="group flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 hover:bg-muted/30 transition text-sm gap-2">
+    <div
+      id={`lead-${lead.id}`}
+      className={cn(
+        "group flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 hover:bg-muted/30 transition text-sm gap-2 relative",
+        isHighlighted && "animate-lead-highlight"
+      )}
+    >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <Link

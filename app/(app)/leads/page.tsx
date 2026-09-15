@@ -1,5 +1,3 @@
-
-
 import Link from "next/link";
 import { getOrCreateBusiness } from "@/src/server/services/business.service";
 import { listLeads } from "@/src/server/services/lead.service";
@@ -7,15 +5,13 @@ import { LeadStatus, LeadPriority } from "@prisma/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormSelect } from "@/components/shared/Form-select";
-
-import { InlineLeadRow } from "@/components/shared/inline-lead-row";
-
+import { LeadsList } from "@/components/leads/leads-list";
 import { LeadsHeaderActions } from "@/components/leads/leads-header-actions";
 
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; priority?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; priority?: string; created?: string }>;
 }) {
   const params = await searchParams;
   const business = await getOrCreateBusiness();
@@ -73,14 +69,7 @@ export default async function LeadsPage({
         <Button type="submit" variant="outline">Filter</Button>
       </form>
 
-      <div className="border rounded-md divide-y bg-card">
-        {leads.length === 0 && (
-          <div className="p-6 text-sm text-muted-foreground text-center">No leads yet.</div>
-        )}
-        {leads.map((lead) => (
-          <InlineLeadRow key={lead.id} lead={lead} />
-        ))}
-      </div>
+      <LeadsList leads={leads} highlightId={params.created} />
     </div>
   );
 }
