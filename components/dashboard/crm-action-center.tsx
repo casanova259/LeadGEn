@@ -1,5 +1,7 @@
 "use client";
 
+//use it fot the ui
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -157,8 +159,8 @@ export function CrmActionCenter({
                 const phoneClean = cleanPhoneNumber(lead.phone);
                 const waUrl = phoneClean
                   ? `https://wa.me/${phoneClean.replace("+", "")}?text=${encodeURIComponent(
-                      `Hi ${lead.name}, following up regarding your inquiry!`
-                    )}`
+                    `Hi ${lead.name}, following up regarding your inquiry!`
+                  )}`
                   : null;
 
                 return (
