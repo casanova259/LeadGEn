@@ -64,7 +64,7 @@ export function CrmActionCenter({
     setCompletedIds((prev) => [...prev, task.id]);
     setOptimisticCount((prev) => prev + 1);
 
-    // 2. Immediate feedback toast
+    // 2. Immediate feedback toast         
     toast({
       message: `Follow-up completed for ${task.lead.name}`,
       state: "success",

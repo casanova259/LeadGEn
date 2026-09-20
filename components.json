@@ -23,6 +23,7 @@
   "menuAccent": "subtle",
   "registries": {
     "@efferd": "https://efferd.com/r/{style}/{name}.json",
-    "@kobra": "https://kobra.systems/r/{name}.json"
+    "@kobra": "https://kobra.systems/r/{name}.json",
+    "@reui": "https://reui.io/r/{style}/{name}.json"
   }
 }
