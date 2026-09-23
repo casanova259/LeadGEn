@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FormSelect } from "@/components/shared/Form-select";
 import { KanbanBoard } from "@/components/leads/kanban/kanban-board";
 import { LeadsHeaderActions } from "@/components/leads/leads-header-actions";
-import { List, Kanban, Sparkles } from "lucide-react";
+import { List } from "lucide-react";
 
 export default async function KanbanLeadsPage({
   searchParams,

@@ -1,5 +1,5 @@
 import { ComponentProps, useState } from "react"
-import { Badge } from "@/components/reui/badge"
+import { Badge } from "@/src/components/reui/badge"
 import {
   Kanban,
   KanbanBoard,
@@ -9,7 +9,7 @@ import {
   KanbanItem,
   KanbanItemHandle,
   KanbanOverlay,
-} from "@/components/reui/kanban"
+} from "@/src/components/reui/kanban"
 
 import {
   Avatar,
@@ -216,7 +216,7 @@ export function Pattern() {
     <Kanban
       value={columns}
       onValueChange={setColumns}
-      getItemValue={(item) => item.id}
+      getItemValue={(item: Task) => item.id}
     >
       <KanbanBoard className="grid auto-rows-fr grid-cols-3">
         {Object.entries(columns).map(([columnValue, tasks]) => (
