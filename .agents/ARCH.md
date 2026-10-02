@@ -1,69 +1,54 @@
-# Architecture — Lost Leads
+> **Note**: For the complete, authoritative system documentation covering all data models, server actions, webhooks, and workflows, see [PROJECT_DOCUMENTATION.md](file:///p:/lost-leads/lost-leads/PROJECT_DOCUMENTATION.md).
 
-## Folder structure
+## High-Level System Structure
 
 ```
 app/
-  page.tsx                 → homepage, composes all sections
-  globals.css               → Tailwind entry; ALL @theme tokens live here (see AGENT.md)
+  page.tsx                     → Marketing landing page (OriginKit sections)
+  globals.css                  → Tailwind v4 entry; ALL @theme tokens live here
+  layout.tsx                   → Root layout with ClerkProvider
+  (app)/                       → Authenticated CRM workspace
+    layout.tsx                 → App shell (Sidebar, Header, Breadcrumbs)
+    dashboard/page.tsx         → Command center (Rescue Queue, KPI cards, Flow Chart)
+    kanbanleads/page.tsx       → ReUI @dnd-kit multi-column Kanban board
+    leads/page.tsx             → Full leads table with search, filters, import/export
+    leads/[id]/page.tsx        → Lead 360 detail, multi-category notes, task list
+    tasks/page.tsx             → Task center (Overdue, Today, Completed)
+    settings/page.tsx          → Webhook endpoints, API keys, business settings
+  api/
+    webhook/lead/route.ts      → Inbound generic lead webhook (JSON/Form-Data)
+    webhook/whatsapp/route.ts  → Meta WhatsApp Cloud API webhook
+    cron/digest/route.ts       → Vercel cron morning email digest
+    leads/export/route.ts      → CSV lead export endpoint
 
 components/
-  originkit/
-    hero-01.tsx              → hero section wrapper (imports CSS, renders content)
-    hero-01.css               → hero keyframes/local styles
-    features-01.tsx           → tabbed feature showcase w/ live preview panel
-    features-01.css
-    features-04.tsx           → "Why Lost Leads" 5-tile band (FeaturesWhy export)
-    features-04.css
-    pricing-01.tsx             → pricing cards w/ monthly/yearly toggle
-    pricing-01.css
-    process-01.css             → shared entrance-animation keyframes (imported
-                                  by features-01)
-    breakpoints.css            → legacy/reference copy of breakpoint tokens —
-                                  NOT actually wired into the Tailwind build;
-                                  the real source of truth is globals.css
-    ui/
-      hero-01/
-        hero-01-content.tsx    → all hero markup, nav, CTAs, browser preview mock
-        spotlight-reveal.tsx   → word-by-word text reveal animation, generic/reusable
-        trusted-by.tsx         → logo strip, generic/reusable (takes logos as props)
-      features-04/
-        cards.tsx               → Plate / FeatureCard / WideCard building blocks
-        ascii-art.tsx            → wraps an image in the ASCII-reveal canvas effect
-        ascii-reveal.tsx         → canvas-based image→ASCII renderer (generic)
-        corner-blocks.tsx        → decorative corner marks (generic)
-        edge-dot-bands.tsx       → decorative dot border (generic)
-        grid-pattern.tsx         → decorative background grid lines (generic)
-      pricing-01/
-        billing-toggle.tsx       → monthly/yearly switch + useBillingCycle hook
+  dashboard/                   → CRM Action Center, Dispatch Chart, Status Rail, KPIs
+  leads/                       → Lead list, import dialog, note composer, Kanban
+    kanban/                    → ReUI @dnd-kit kanban-board.tsx, kanban-card.tsx
+  tasks/                       → Task list view, create dialog, task row
+  shared/                      → Sidebar, navbar, breadcrumbs, onboarding checklist
+  ui/                          → Base UI primitives (button, card, dialog, etc.)
+  originkit/                   → Marketing landing page components (Hero, Features, Pricing)
 
-public/
-  originkit/
-    features-04/
-      focus.png, connect.png, scale.png   → generated isometric-shape source
-                                             images for the ASCII-art effect
-                                             (placeholders — see AGENT.md)
+src/
+  components/reui/             → ReUI Kanban and badge primitives
+  server/
+    actions/                   → Server Actions (lead.actions, task.action, setting.actions)
+    services/                  → Business logic (lead.service, task.service, business, email)
 
-.agents/
-  AGENT.md      → agent-facing instructions (read this first)
-  ARCH.md       → this file
+prisma/
+  schema.prisma                → Database models (Business, Lead, Task, Activity)
 ```
 
-## Page composition
-
-`app/page.tsx`:
+## Landing Page Composition (`app/page.tsx`)
 
 ```tsx
 <Hero01 />        {/* nav, headline, CTAs, Rescue Queue browser mockup, trusted-by strip */}
 <Features01 />    {/* tabbed feature explorer: Rescue Queue / Auto tasks / Lead list / Analytics */}
-<FeaturesWhy />    {/* 5-tile "Why Lost Leads" band: Focus / Connect / Scale + 2 stat plates */}
-<Pricing01 />       {/* Starter / Growth / Scale pricing cards, monthly-yearly toggle */}
+<FeaturesWhy />   {/* 5-tile "Why Lost Leads" band: Focus / Connect / Scale + 2 stat plates */}
+<Pricing01 />     {/* Starter / Growth / Scale pricing cards, monthly-yearly toggle */}
+<Footer />        {/* Product navigation footer */}
 ```
-
-Each section is a self-contained `"use client"` component. There's no shared
-layout/header/footer component yet — the hero's own nav bar (in
-`hero-01-content.tsx`) currently serves as the page header, and there is no
-footer section built yet.
 
 ## Where content lives
 
