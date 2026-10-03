@@ -39,14 +39,12 @@ export async function sendDailyDigest(businessId: string, toEmail: string) {
 }
 
 export async function sendDailyDigestForAllBusinesses() {
-    const { clerkClient } = await import("@clerk/nextjs/server");
-    const client = await clerkClient();
+    const { resolveOwnerEmail } = await import("@/src/server/services/auth.service");
     const businesses = await prisma.business.findMany();
 
     for (const business of businesses) {
         try {
-            const user = await client.users.getUser(business.ownerId);
-            const email = user.primaryEmailAddress?.emailAddress;
+            const email = await resolveOwnerEmail(business.ownerId);
             if (email) await sendDailyDigest(business.id, email);
         } catch (err) {
             console.error(`Failed digest for business ${business.id}:`, err);

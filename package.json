@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx tests/auth-foundation.test.ts"
+    "test": "tsx tests/auth-foundation.test.ts && tsx tests/auth-integration.test.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",

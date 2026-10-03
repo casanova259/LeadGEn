@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/src/server/services/auth.service";
 import { getOrCreateBusiness } from "@/src/server/services/business.service";
 import { listLeads } from "@/src/server/services/lead.service";
 import { LeadStatus, LeadPriority } from "@prisma/client";
@@ -14,6 +15,14 @@ function escapeCSV(value: unknown): string {
 
 export async function GET(request: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized: Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const business = await getOrCreateBusiness();
     const url = new URL(request.url);
     const search = url.searchParams.get("q") || undefined;

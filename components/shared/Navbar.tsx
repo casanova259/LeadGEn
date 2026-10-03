@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
+import { UserMenu } from "@/components/auth/user-menu";
 
 type RouteConfig = {
   title: string;
@@ -39,10 +40,16 @@ export function Navbar({
   title,
   quickCreateHref,
   quickCreateLabel = "Quick Create",
+  authUser,
 }: {
   title?: string;
   quickCreateHref?: string;
   quickCreateLabel?: string;
+  authUser?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null;
 }) {
   const pathname = usePathname();
   const routeConfig = resolveConfig(pathname);
@@ -66,13 +73,17 @@ export function Navbar({
             {resolvedQuickCreateLabel}
           </Link>
         )}
-        <UserButton
-          appearance={{
-            elements: {
-              userButtonAvatarBox: "h-8 w-8 rounded-full",
-            },
-          }}
-        />
+        {authUser ? (
+          <UserMenu user={authUser} />
+        ) : (
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "h-8 w-8 rounded-full",
+              },
+            }}
+          />
+        )}
       </div>
     </header>
   );

@@ -79,8 +79,8 @@ export async function importLeadsAction(
     name: string;
     phone?: string;
     email?: string;
-    source?: any;
-    priority?: any;
+    source?: import("@prisma/client").LeadSource;
+    priority?: import("@prisma/client").LeadPriority;
     notes?: string;
   }>,
   autoCreateTasks: boolean = true

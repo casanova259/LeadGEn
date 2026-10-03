@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/src/server/services/auth.service";
 import { getOrCreateBusiness } from "@/src/server/services/business.service";
 import { createLead } from "@/src/server/services/lead.service";
 import { LeadSource, LeadPriority } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized: Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const business = await getOrCreateBusiness();
     const body = await request.json().catch(() => null);
 
@@ -73,10 +82,11 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to create lead:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { error: error?.message || "Internal server error" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
