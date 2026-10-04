@@ -9,6 +9,17 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // If the request contains an Auth.js session cookie, permit access
+  const hasAuthJsSession =
+    req.cookies.has("authjs.session-token") ||
+    req.cookies.has("__Secure-authjs.session-token") ||
+    req.cookies.has("next-auth.session-token") ||
+    req.cookies.has("__Secure-next-auth.session-token");
+
+  if (hasAuthJsSession) {
+    return;
+  }
+
   if (isProtectedRoute(req)) {
     await auth.protect();
   }

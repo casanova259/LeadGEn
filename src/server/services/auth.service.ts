@@ -44,33 +44,13 @@ function isNextControlFlowError(err: unknown): boolean {
 }
 
 /**
- * Retrieves the currently authenticated user from either active authentication system:
- * 1. Checks Clerk session (current production primary).
- * 2. Checks Auth.js session (NextAuth v5 foundation).
+ * Retrieves the currently authenticated user from the active authentication system:
+ * 1. Checks Auth.js session (primary production identity post-migration).
+ * 2. Checks Clerk session (transitional fallback during verification window).
  * 3. Returns null if unauthenticated.
  */
 export async function getCurrentUser(): Promise<CurrentAuthUser | null> {
-  // 1. Check Clerk session first (preserves 100% of current production behavior)
-  try {
-    const { auth: clerkAuth } = await import("@clerk/nextjs/server");
-    const { userId } = await clerkAuth();
-    if (userId) {
-      return {
-        id: userId,
-        email: null,
-        name: null,
-        image: null,
-        provider: "clerk",
-      };
-    }
-  } catch (err: unknown) {
-    if (isNextControlFlowError(err)) {
-      throw err;
-    }
-    // Clerk not active or context uninitialized, proceed to Auth.js
-  }
-
-  // 2. Check Auth.js session
+  // 1. Check Auth.js session (primary post-migration)
   try {
     const { auth: authjsAuth } = await import("@/auth");
     const session = await authjsAuth();
@@ -88,6 +68,46 @@ export async function getCurrentUser(): Promise<CurrentAuthUser | null> {
       throw err;
     }
     // Auth.js not active in this context
+  }
+
+  // 2. Check Clerk session as transitional fallback
+  try {
+    const { auth: clerkAuth } = await import("@clerk/nextjs/server");
+    const { userId } = await clerkAuth();
+    if (userId) {
+      // Check if this Clerk user was migrated to an Auth.js user
+      const audit = await prisma.clerkMigrationAudit.findUnique({
+        where: { clerkUserId: userId },
+      });
+
+      if (audit?.status === "MIGRATED") {
+        const authUser = await prisma.user.findUnique({
+          where: { id: audit.authUserId },
+        });
+        if (authUser) {
+          return {
+            id: authUser.id,
+            email: authUser.email ?? null,
+            name: authUser.name ?? null,
+            image: authUser.image ?? null,
+            provider: "authjs",
+          };
+        }
+      }
+
+      return {
+        id: userId,
+        email: null,
+        name: null,
+        image: null,
+        provider: "clerk",
+      };
+    }
+  } catch (err: unknown) {
+    if (isNextControlFlowError(err)) {
+      throw err;
+    }
+    // Clerk not active or context uninitialized
   }
 
   return null;

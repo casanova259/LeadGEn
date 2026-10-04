@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx tests/auth-foundation.test.ts && tsx tests/auth-integration.test.ts"
+    "test": "tsx tests/auth-foundation.test.ts && tsx tests/auth-integration.test.ts && tsx tests/auth-migration.test.ts",
+    "migrate:clerk-to-authjs": "tsx --env-file=.env scripts/migrate-clerk-to-authjs.ts",
+    "migrate:clerk-to-authjs:apply": "tsx --env-file=.env scripts/migrate-clerk-to-authjs.ts --apply",
+    "migrate:clerk-to-authjs:rollback": "tsx --env-file=.env scripts/migrate-clerk-to-authjs.ts --rollback"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",

@@ -189,14 +189,19 @@ async function runIntegrationTests() {
     }
   });
 
-  // --- Category 5: Existing Clerk Ownership Preservation ---
-  console.log("\n--- 5. Existing Clerk Ownership Preservation ---");
-  await test("Existing Business records and Clerk ownerIds remain 100% intact", async () => {
+  // --- Category 5: Business Ownership & Data Integrity ---
+  console.log("\n--- 5. Business Ownership & Data Integrity ---");
+  await test("Existing Business records have valid Auth.js ownerIds and zero orphaned records", async () => {
     const currentBusinesses = await prisma.business.findMany({
       select: { id: true, ownerId: true, name: true },
     });
     assert.equal(currentBusinesses.length, baselineBusinessCount, "Business count must match baseline");
-    assert.deepEqual(currentBusinesses, baselineBusinesses, "Business records must be completely identical to baseline");
+
+    const allUsers = await prisma.user.findMany({ select: { id: true } });
+    const userIds = new Set(allUsers.map((u) => u.id));
+    for (const b of currentBusinesses) {
+      assert.ok(userIds.has(b.ownerId), `Business ${b.id} ownerId ${b.ownerId} must reference a valid Auth.js User`);
+    }
   });
 
   await test("Existing Leads, Tasks, and Activities remain 100% unchanged", async () => {

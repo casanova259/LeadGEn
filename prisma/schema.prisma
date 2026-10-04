@@ -75,6 +75,19 @@ model Business {
   @@map("businesses")
 }
 
+model ClerkMigrationAudit {
+  id           String    @id @default(cuid())
+  clerkUserId  String    @unique
+  authUserId   String    @unique
+  businessId   String    @unique
+  sourceEmail  String
+  status       String
+  createdAt    DateTime  @default(now())
+  migratedAt   DateTime?
+
+  @@map("clerk_migration_audits")
+}
+
 model Lead {
   id          String       @id @default(cuid())
   businessId  String
