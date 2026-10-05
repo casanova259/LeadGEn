@@ -25,7 +25,7 @@ Clinics, coaching institutes, gyms, salons, local agencies, real estate brokers,
 | Backend | Next.js Route Handlers, Server Actions |
 | Database | Supabase (PostgreSQL) |
 | ORM | Prisma |
-| Auth | Clerk |
+| Auth | Auth.js (NextAuth v5) + Prisma Adapter |
 | Email | Resend |
 | Charts | Recharts |
 | Deployment | Vercel |
@@ -43,10 +43,11 @@ Create a `.env` file:
 DATABASE_URL=postgresql://...          # Supabase session/transaction pooler
 DIRECT_URL=postgresql://...            # Supabase direct connection (for migrations)
 
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
-CLERK_SECRET_KEY=sk_...
+AUTH_SECRET=your_auth_secret           # Generate via `npx auth secret`
+AUTH_URL=http://localhost:3000
 
 RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=Lost Leads <notifications@lostleads.app>
 CRON_SECRET=your-random-secret
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
@@ -90,7 +91,7 @@ prisma/
 
 Deployed on Vercel. The daily digest email is triggered via a Vercel Cron Job defined in `vercel.json`, calling `/api/cron/digest` once a day.
 
-Make sure all environment variables above are also set in the Vercel project settings, and that your Clerk instance allows the production domain.
+Make sure all environment variables above are also set in the Vercel project settings, and that `AUTH_URL` is set to your production domain.
 
 ## Roadmap
 

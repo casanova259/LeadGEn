@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
 import { UserMenu } from "@/components/auth/user-menu";
 
 type RouteConfig = {
@@ -73,17 +72,7 @@ export function Navbar({
             {resolvedQuickCreateLabel}
           </Link>
         )}
-        {authUser ? (
-          <UserMenu user={authUser} />
-        ) : (
-          <UserButton
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "h-8 w-8 rounded-full",
-              },
-            }}
-          />
-        )}
+        <UserMenu user={authUser ?? {}} />
       </div>
     </header>
   );

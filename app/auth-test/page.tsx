@@ -12,7 +12,7 @@ export default async function AuthTestPage() {
           </span>
           <h1 className="text-xl font-semibold mt-2 text-white">Auth.js Foundation Test</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Isolated server-side session verification. Does not touch production tenants or Clerk.
+            Isolated server-side session verification.
           </p>
         </div>
 

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,19 +39,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      {/*
-        NOTE: intentionally NOT forcing `dark` here at the root anymore.
-        The landing page (app/page.tsx) is designed light/white.
-        The logged-in app previously relied on <html className="dark">
-        from this file — move that class onto app/(app)/layout.tsx instead
-        (e.g. wrap its content in a `<div className="dark">` or add
-        `className="dark"` to that route group's own top-level element)
-        so only the dashboard renders dark, not the marketing site.
-      */}
-      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-        <body className="font-sans antialiased">{children}</body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="font-sans antialiased">{children}</body>
+    </html>
   );
 }

@@ -6,7 +6,9 @@
 app/
   page.tsx                     → Marketing landing page (OriginKit sections)
   globals.css                  → Tailwind v4 entry; ALL @theme tokens live here
-  layout.tsx                   → Root layout with ClerkProvider
+  layout.tsx                   → Server-first root layout
+  proxy.ts                     → Next.js 16 Auth.js proxy route protection
+  auth.ts                      → Auth.js NextAuth configuration
   (app)/                       → Authenticated CRM workspace
     layout.tsx                 → App shell (Sidebar, Header, Breadcrumbs)
     dashboard/page.tsx         → Command center (Rescue Queue, KPI cards, Flow Chart)

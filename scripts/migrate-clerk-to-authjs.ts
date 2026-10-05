@@ -1,5 +1,4 @@
 import { prisma } from "../lib/prisma";
-import { clerkClient } from "@clerk/nextjs/server";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
@@ -80,12 +79,46 @@ export async function runMigration(mode: "dry-run" | "apply" | "rollback" = "dry
     return await executeRollback(businesses, existingAudits, baseline);
   }
 
-  // 2. Fetch all Clerk users
-  console.log("[1/4] Fetching Clerk users from Clerk API...");
-  const client = await clerkClient();
-  const clerkUsersResponse = await client.users.getUserList({ limit: 500 });
-  const clerkUsers = clerkUsersResponse.data;
-  console.log(`  Discovered ${clerkUsers.length} Clerk users in instance.\n`);
+  // 2. Fetch Clerk users from Clerk API (if available) or snapshot
+  console.log("[1/4] Loading Clerk user identity mapping...");
+  let clerkUsers: any[] = [];
+  try {
+    // @ts-ignore
+    const clerkModule = await import("@clerk/nextjs/server").catch(() => null);
+    if (clerkModule?.clerkClient) {
+      const client = await clerkModule.clerkClient();
+      const res = await client.users.getUserList({ limit: 500 });
+      clerkUsers = res.data;
+    }
+  } catch {
+    // Clerk SDK uninstalled in Phase 5
+  }
+
+  // Fallback to migration snapshot if Clerk SDK is uninstalled
+  if (clerkUsers.length === 0 && fs.existsSync(SNAPSHOT_FILE)) {
+    try {
+      const savedSnapshot = JSON.parse(fs.readFileSync(SNAPSHOT_FILE, "utf-8"));
+      clerkUsers = (savedSnapshot.items || []).map((item: any) => ({
+        id: item.clerkUserId,
+        firstName: item.clerkName?.split(" ")[0] || "",
+        lastName: item.clerkName?.split(" ").slice(1).join(" ") || "",
+        imageUrl: item.clerkImageUrl,
+        primaryEmailAddressId: "primary",
+        emailAddresses: [
+          {
+            id: "primary",
+            emailAddress: item.clerkEmail,
+            verification: { status: item.clerkVerified ? "verified" : "unverified" },
+          },
+        ],
+      }));
+      console.log(`  Loaded ${clerkUsers.length} Clerk user identities from snapshot.`);
+    } catch (e) {
+      console.error("Failed to load snapshot fallback:", e);
+    }
+  } else {
+    console.log(`  Discovered ${clerkUsers.length} Clerk users in instance.\n`);
+  }
 
   // Build Clerk user index by ID and email
   const clerkById = new Map<string, (typeof clerkUsers)[0]>();
@@ -196,7 +229,7 @@ export async function runMigration(mode: "dry-run" | "apply" | "rollback" = "dry
 
     // Find primary email
     const primaryEmailObj = clerkUser.emailAddresses.find(
-      (e) => e.id === clerkUser.primaryEmailAddressId
+      (e: any) => e.id === clerkUser.primaryEmailAddressId
     ) ?? clerkUser.emailAddresses[0];
 
     if (!primaryEmailObj?.emailAddress) {

@@ -57,10 +57,10 @@ Small service businesses (dental clinics, medical practices, salons, coaching in
 | **Drag & Drop** | **@dnd-kit** | `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` for Kanban |
 | **Data Visualizations** | **Recharts 3.8.0** | Interactive area charts, dispatch trends, pipeline flow analytics |
 | **Animations** | **Motion 13.1.1** | `motion/react` for hero animations, transitions, and reveals |
-| **Authentication** | **Clerk (@clerk/nextjs 7.5.20)** | Multi-tenant auth, session validation, route protection middleware |
+| **Authentication** | **Auth.js (NextAuth v5.0.0-beta.32)** | Passwordless Magic Links (Resend), Prisma Adapter, Next.js 16 proxy route protection |
 | **Database** | **PostgreSQL (Supabase)** | Cloud Postgres with connection pooling (`DATABASE_URL`) & direct (`DIRECT_URL`) |
 | **ORM** | **Prisma 6.19.3** | Type-safe queries, relational schema migrations, connection pooling |
-| **Email Service** | **Resend 6.18.1** | Transactional daily digest dispatches with formatted HTML templates |
+| **Email Service** | **Resend 6.18.1** | Transactional daily digest dispatches & Auth.js magic link sign-in |
 | **Icons** | **Lucide React 1.26.0** | Clean, consistent SVG icon set across all UI surfaces |
 
 ---
@@ -77,7 +77,7 @@ flowchart TD
     end
 
     subgraph Authentication & Business Context
-        CLERK[Clerk Auth / Middleware] --> GETBI["getOrCreateBusiness()"]
+        AUTHJS["Auth.js (NextAuth v5) / proxy.ts"] --> GETBI["getOrCreateBusiness()"]
     end
 
     subgraph Application Core [src/server/services/]
@@ -110,8 +110,8 @@ flowchart TD
 ```
 
 ### Multi-Tenancy Architecture
-- Every authenticated user session is verified via `@clerk/nextjs`.
-- The helper `getOrCreateBusiness()` maps the Clerk `ownerId` to a record in the `businesses` table.
+- Every authenticated user session is verified via Auth.js (`await auth()`).
+- The helper `getOrCreateBusiness()` maps the Auth.js `User.id` (stored as `Business.ownerId`) to a record in the `businesses` table.
 - If a business profile does not exist yet (e.g. first login), one is automatically created with default timezone and business naming.
 - All lead queries, task creations, and mutations enforce strict tenancy isolation: `{ businessId: business.id }`.
 
@@ -318,9 +318,9 @@ lost-leads/
 │   │   ├── cron/digest/          # Daily email digest cron endpoint
 │   │   ├── leads/                # Inbound API & /export CSV download
 │   │   └── webhook/              # /webhook/lead and /webhook/whatsapp
-│   ├── sign-in/ & sign-up/       # Clerk authentication pages
+│   ├── sign-in/ & sign-up/       # Auth.js authentication and onboarding pages
 │   ├── globals.css               # Tailwind CSS v4 entry & @theme definition
-│   ├── layout.tsx                # Root HTML/Clerk Provider layout
+│   ├── layout.tsx                # Server-first Root HTML layout
 │   └── page.tsx                  # Public marketing landing page
 ├── components/                   # React UI Components
 │   ├── dashboard/                # CRM action center, status rail, dispatch chart, KPIs
@@ -331,16 +331,17 @@ lost-leads/
 │   ├── tasks/                    # Task list views, row items, create modals
 │   └── ui/                       # shadcn/ui primitives (button, card, dialog, etc.)
 ├── prisma/                       # Database schema and migrations
-│   ├── schema.prisma             # Core models (Business, Lead, Task, Activity)
+│   ├── schema.prisma             # Core models (Business, Lead, Task, Activity, Auth.js)
 │   └── migrations/               # PostgreSQL migration history
 ├── src/                          # Server services and reusable ReUI extensions
 │   ├── components/reui/          # ReUI Kanban (@dnd-kit primitives) & Badge
 │   └── server/
 │       ├── actions/              # Server Actions (lead.actions, task.action, setting)
-│       └── services/             # lead.service, task.service, business, email
+│       └── services/             # lead.service, task.service, business, email, auth
 ├── lib/
 │   └── prisma.ts                 # Prisma Client singleton
-├── middleware.ts                 # Clerk route protection & auth redirection
+├── proxy.ts                      # Next.js 16 Auth.js proxy route protection
+├── auth.ts                       # Central Auth.js configuration & handlers
 ├── package.json                  # Dependencies & scripts
 └── PROJECT_DOCUMENTATION.md      # This master document
 ```
@@ -378,7 +379,7 @@ lost-leads/
 | `/api/webhook/whatsapp` | `GET` | Meta Verify Token | Meta WhatsApp Cloud API webhook challenge verification. |
 | `/api/webhook/whatsapp` | `POST` | None (Payload-based) | Ingests incoming WhatsApp chat messages, auto-creating a new lead or logging message. |
 | `/api/cron/digest` | `GET` | Bearer Token (`CRON_SECRET`) | Dispatches morning email digests to all business owners via Resend. |
-| `/api/leads/export` | `GET` | Authenticated (Clerk) | Streams an RFC-4180 CSV file containing all leads for the current business. |
+| `/api/leads/export` | `GET` | Authenticated (Auth.js) | Streams an RFC-4180 CSV file containing all leads for the current business. |
 
 #### Webhook Ingestion Payload Example (`POST /api/webhook/lead`)
 ```json
@@ -445,15 +446,11 @@ DATABASE_URL="postgresql://postgres.[project]:[password]@aws-0-[region].pooler.s
 # Direct connection URL (port 5432) for migrations
 DIRECT_URL="postgresql://postgres.[project]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres"
 
-# Authentication (Clerk)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
-CLERK_SECRET_KEY="sk_test_..."
-NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
-NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL="/dashboard"
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL="/dashboard"
+# Authentication (Auth.js / NextAuth v5)
+AUTH_SECRET="your_openssl_generated_auth_secret"
+AUTH_URL="http://localhost:3000"
 
-# Email Services (Resend)
+# Email Services (Resend - used for Magic Link Authentication & Daily Digest)
 RESEND_API_KEY="re_..."
 RESEND_FROM_EMAIL="Lost Leads <notifications@lostleads.app>"
 
@@ -505,7 +502,7 @@ WHATSAPP_VERIFY_TOKEN="lostleads_whatsapp_verify"
 
 ### Production Deployment (Vercel)
 1. Link repository to Vercel.
-2. In Project Settings > Environment Variables, populate all variables listed in section 9.
+2. In Project Settings > Environment Variables, populate all variables listed in section 9 (`DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_URL`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CRON_SECRET`).
 3. In `vercel.json`, configure the cron schedule for the daily digest:
    ```json
    {
@@ -517,4 +514,4 @@ WHATSAPP_VERIFY_TOKEN="lostleads_whatsapp_verify"
      ]
    }
    ```
-4. In Clerk Dashboard, ensure your production domain is added to authorized origins and redirect URIs.
+4. In your hosting provider (Vercel), ensure `AUTH_URL` points to your production custom domain.

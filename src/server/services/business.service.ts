@@ -1,12 +1,19 @@
 import { requireCurrentUser } from "@/src/server/services/auth.service";
 import { prisma } from "@/lib/prisma";
 
-export async function getOrCreateBusiness() {
-  const user = await requireCurrentUser();
+export async function getOrCreateBusiness(userId?: string, userName?: string | null) {
+  let id = userId;
+  let name = userName;
+
+  if (!id) {
+    const user = await requireCurrentUser();
+    id = user.id;
+    name = user.name;
+  }
 
   // 1. Look up existing business for this authenticated user ID
   let business = await prisma.business.findUnique({
-    where: { ownerId: user.id },
+    where: { ownerId: id },
   });
 
   // 2. If no business exists yet for this user:
@@ -14,8 +21,8 @@ export async function getOrCreateBusiness() {
   if (!business) {
     business = await prisma.business.create({
       data: {
-        ownerId: user.id,
-        name: user.name ? `${user.name}'s Business` : "My Business",
+        ownerId: id,
+        name: name ? `${name}'s Business` : "My Business",
       },
     });
   }

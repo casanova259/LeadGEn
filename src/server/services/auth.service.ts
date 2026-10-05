@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export type AuthProviderType = "clerk" | "authjs";
+export type AuthProviderType = "authjs";
 
 export type CurrentAuthUser = {
   id: string;
@@ -23,7 +23,7 @@ export class UnauthorizedError extends Error {
 export class TenantNotProvisionedError extends Error {
   statusCode: number;
 
-  constructor(message = "Forbidden: No business tenant associated with this account") {
+  constructor(message = "TenantNotProvisioned: User has no provisioned business") {
     super(message);
     this.name = "TenantNotProvisionedError";
     this.statusCode = 403;
@@ -44,13 +44,10 @@ function isNextControlFlowError(err: unknown): boolean {
 }
 
 /**
- * Retrieves the currently authenticated user from the active authentication system:
- * 1. Checks Auth.js session (primary production identity post-migration).
- * 2. Checks Clerk session (transitional fallback during verification window).
- * 3. Returns null if unauthenticated.
+ * Retrieves the currently authenticated user from Auth.js.
+ * Returns null if unauthenticated.
  */
 export async function getCurrentUser(): Promise<CurrentAuthUser | null> {
-  // 1. Check Auth.js session (primary post-migration)
   try {
     const { auth: authjsAuth } = await import("@/auth");
     const session = await authjsAuth();
@@ -68,46 +65,6 @@ export async function getCurrentUser(): Promise<CurrentAuthUser | null> {
       throw err;
     }
     // Auth.js not active in this context
-  }
-
-  // 2. Check Clerk session as transitional fallback
-  try {
-    const { auth: clerkAuth } = await import("@clerk/nextjs/server");
-    const { userId } = await clerkAuth();
-    if (userId) {
-      // Check if this Clerk user was migrated to an Auth.js user
-      const audit = await prisma.clerkMigrationAudit.findUnique({
-        where: { clerkUserId: userId },
-      });
-
-      if (audit?.status === "MIGRATED") {
-        const authUser = await prisma.user.findUnique({
-          where: { id: audit.authUserId },
-        });
-        if (authUser) {
-          return {
-            id: authUser.id,
-            email: authUser.email ?? null,
-            name: authUser.name ?? null,
-            image: authUser.image ?? null,
-            provider: "authjs",
-          };
-        }
-      }
-
-      return {
-        id: userId,
-        email: null,
-        name: null,
-        image: null,
-        provider: "clerk",
-      };
-    }
-  } catch (err: unknown) {
-    if (isNextControlFlowError(err)) {
-      throw err;
-    }
-    // Clerk not active or context uninitialized
   }
 
   return null;
@@ -141,34 +98,20 @@ export async function requireCurrentUser(): Promise<CurrentAuthUser> {
 }
 
 /**
- * Resolves the owner's email address safely for daily digest and notifications.
- * - If the ownerId belongs to a local Auth.js User, queries PostgreSQL directly.
- * - If the ownerId belongs to an existing Clerk account, queries the Clerk backend API.
+ * Resolves the owner's email address safely for daily digest and notifications
+ * directly from the local PostgreSQL User model.
  */
 export async function resolveOwnerEmail(ownerId: string): Promise<string | null> {
   if (!ownerId) return null;
 
-  // 1. Check local Auth.js User table first
   try {
     const localUser = await prisma.user.findUnique({
       where: { id: ownerId },
       select: { email: true },
     });
-    if (localUser?.email) {
-      return localUser.email;
-    }
+    return localUser?.email ?? null;
   } catch (err) {
-    console.error(`Error querying local user for owner ${ownerId}:`, err);
-  }
-
-  // 2. Fall back to Clerk backend API for existing Clerk-owned businesses
-  try {
-    const { clerkClient } = await import("@clerk/nextjs/server");
-    const client = await clerkClient();
-    const clerkUser = await client.users.getUser(ownerId);
-    return clerkUser.primaryEmailAddress?.emailAddress ?? null;
-  } catch (err) {
-    console.error(`Failed to resolve email via Clerk for owner ${ownerId}:`, err);
+    console.error(`Error querying user email for owner ${ownerId}:`, err);
     return null;
   }
 }

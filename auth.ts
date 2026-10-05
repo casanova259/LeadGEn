@@ -10,7 +10,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   },
   providers: [
     Resend({
-      from: process.env.RESEND_FROM_EMAIL || "notifications@lostleads.app",
+      from: process.env.RESEND_FROM_EMAIL || "Lost Leads <onboarding@resend.dev>",
     }),
   ],
   trustHost: true,
