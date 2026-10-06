@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Settings, Bell } from "lucide-react";
+import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/toast";
 
 export function CrmHeader({
   businessName,
@@ -51,27 +50,6 @@ export function CrmHeader({
           className="h-8 rounded-[8px] bg-[var(--accent-blue)] text-[#0C0E11] hover:bg-[var(--accent-blue)]/90 text-[13px] font-sans font-medium transition-colors focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)]"
         >
           <Link href="/leads/new">+ New lead</Link>
-        </Button>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            toast({
-              message: "Dispatch Desk: Real-time toast system online",
-              state: "success",
-              action: {
-                label: "Undo",
-                run: () => toast("Action reversed"),
-              },
-            });
-          }}
-          className="h-8 rounded-[8px] border-[var(--hairline)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--surface-raised)] text-[13px] font-sans transition-colors focus-visible:ring-1 focus-visible:ring-[var(--accent-blue)]"
-          title="Test toast notification"
-        >
-          <Bell className="size-3.5 mr-1.5 text-[var(--accent-blue)]" />
-          Test toast
         </Button>
 
         <Button
