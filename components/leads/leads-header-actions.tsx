@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ImportLeadsDialog } from "./import-leads-dialog";
 import { NewLeadDialog } from "./new-lead-dialog";
-import { Upload, Download, Plus, Kanban } from "lucide-react";
+import { Upload, Download, Plus } from "lucide-react";
 
 export function LeadsHeaderActions() {
   const [importOpen, setImportOpen] = useState(false);
@@ -30,18 +30,6 @@ export function LeadsHeaderActions() {
 
   return (
     <div className="flex items-center gap-2">
-      <Button
-        asChild
-        variant="outline"
-        size="sm"
-        className="gap-1.5 text-xs h-9"
-      >
-        <Link href="/kanbanleads" title="Open Kanban Pipeline View">
-          <Kanban className="size-3.5" />
-          <span className="hidden sm:inline">Pipeline</span>
-        </Link>
-      </Button>
-
       <Button
         variant="outline"
         size="sm"

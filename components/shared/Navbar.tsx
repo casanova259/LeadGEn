@@ -18,11 +18,6 @@ const ROUTE_CONFIG: Record<string, RouteConfig> = {
     quickCreateHref: "/leads/new",
     quickCreateLabel: "New Lead",
   },
-  "/kanbanleads": {
-    title: "Pipeline",
-    quickCreateHref: "/leads/new",
-    quickCreateLabel: "New Lead",
-  },
   "/tasks": { title: "Tasks" },
   "/settings": { title: "Settings" },
 };

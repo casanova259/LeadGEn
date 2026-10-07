@@ -13,7 +13,6 @@
 5. [Core Features & Business Workflows](#5-core-features--business-workflows)
    - [Automated Task Scheduling](#automated-task-scheduling)
    - [The Rescue Queue Engine](#the-rescue-queue-engine)
-   - [ReUI `@dnd-kit` Kanban Board (`/kanbanleads`)](#reui-dnd-kit-kanban-board-kanbanleads)
    - [CRM Command Dashboard (`/dashboard`)](#crm-command-dashboard-dashboard)
    - [Lead Management & Batch Import (`/leads`)](#lead-management--batch-import-leads)
    - [Lead 360 Detail View & Notes Engine (`/leads/[id]`)](#lead-360-detail-view--notes-engine-leadsid)
@@ -40,7 +39,6 @@ Small service businesses (dental clinics, medical practices, salons, coaching in
 **Lost Leads** is an ultra-focused, opinionated CRM platform built to eliminate lead decay:
 - **Instant Accountability**: The exact millisecond a lead arrives, a follow-up task is auto-scheduled with a strict 24-hour SLA.
 - **The Rescue Queue**: A dedicated radar that flags any lead untouched after 24 hours, surfacing them in high-contrast urgency badges for instant outreach via WhatsApp or phone.
-- **Fluid Drag-and-Drop Pipeline**: A modern ReUI `@dnd-kit` Kanban board featuring touch gestures, keyboard accessibility, optimistic updates, and one-tap communication.
 - **Zero Friction Ingestion**: Ingests leads seamlessly via open webhooks (JSON / multipart form-data) and direct Meta WhatsApp Cloud API webhooks.
 - **Executive Daily Digest**: Automated morning emails summarizing hot leads, pending outreach, and overdue tasks via Resend and cron.
 
@@ -53,8 +51,7 @@ Small service businesses (dental clinics, medical practices, salons, coaching in
 | **Framework** | **Next.js 16.2.10** | App Router, React Server Components (RSC), Turbopack, Server Actions |
 | **Frontend Runtime** | **React 19.2.4** | Latest React features, concurrent rendering, Actions |
 | **Styling** | **Tailwind CSS v4** | CSS-first configuration using `@theme` in `app/globals.css` |
-| **Component Libraries** | **shadcn/ui + ReUI** | Radix UI primitives (`radix-ui`), custom styled accessible components |
-| **Drag & Drop** | **@dnd-kit** | `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` for Kanban |
+| **Component Libraries** | **shadcn/ui** | Radix UI primitives (`radix-ui`), custom styled accessible components |
 | **Data Visualizations** | **Recharts 3.8.0** | Interactive area charts, dispatch trends, pipeline flow analytics |
 | **Animations** | **Motion 13.1.1** | `motion/react` for hero animations, transitions, and reveals |
 | **Authentication** | **Auth.js (NextAuth v5.0.0-beta.32)** | Passwordless Magic Links (Resend), Prisma Adapter, Next.js 16 proxy route protection |
@@ -100,12 +97,11 @@ flowchart TD
 
     subgraph User Experience [Next.js App Router]
         DASH["/dashboard<br/>(Rescue Queue, KPIs, Flow Chart)"]
-        KANBAN["/kanbanleads<br/>(@dnd-kit Interactive Pipeline)"]
         LEADS["/leads & /leads/[id]<br/>(Search, Filter, Notes, Timeline)"]
         TASKS["/tasks<br/>(Overdue, Today, Completed)"]
     end
 
-    DB_L & DB_T & DB_A --> DASH & KANBAN & LEADS & TASKS
+    DB_L & DB_T & DB_A --> DASH & LEADS & TASKS
     CRON["Vercel Cron (/api/cron/digest)"] --> ES --> RESEND[Resend API] --> USER_EMAIL[Business Owner Email]
 ```
 
@@ -219,20 +215,6 @@ The **Rescue Queue** is Lost Leads' primary differentiator:
   - Highlighted with flame badges and flashing rescue counts.
   - Direct 1-click **WhatsApp chat** and **Phone call** buttons that immediately prompt outreach and mark the lead as `CONTACTED`.
 
-### ReUI `@dnd-kit` Kanban Board (`/kanbanleads`)
-Located at `app/(app)/kanbanleads/page.tsx`:
-- **Modern Drag & Drop**: Uses ReUI primitives built on top of `@dnd-kit` (`@dnd-kit/core`, `@dnd-kit/sortable`).
-- **Columns**: Fixed stage pipeline:
-  1. **New Leads** (`NEW`)
-  2. **Followed Up** (`CONTACTED`, `FOLLOW_UP`, `QUALIFIED`)
-  3. **Converted** (`CONVERTED`)
-- **Key Capabilities**:
-  - **Optimistic Updates**: Dropping a card instantly moves it visually; persists via `updateLeadAction` in the background with rollback if rejected.
-  - **Animated Overlays**: Ghost drag preview tilts slightly and floats under the cursor during drag.
-  - **Touch & Accessibility**: Native mobile touch drag (long-press) and full keyboard accessibility (Tab + Space + Arrow keys).
-  - **Lead Card Quick Actions**: WhatsApp icon button, Phone call icon button, HOT flame badge, dropdown menu for stage changes, and Discard option with 6-second undo toast.
-  - **Quick Add**: Inline form at the foot of each column to quickly inject leads into that specific stage.
-
 ### CRM Command Dashboard (`/dashboard`)
 The command hub for daily operations (`app/(app)/dashboard/page.tsx`):
 1. **CrmHeader**: Personalized business greeting, live date, quick actions (New Lead dialog, Import CSV), and active alert counts.
@@ -310,7 +292,6 @@ lost-leads/
 │   ├── (app)/                    # Authenticated workspace layout
 │   │   ├── layout.tsx            # App shell with Sidebar, Header, Breadcrumbs
 │   │   ├── dashboard/            # /dashboard command center
-│   │   ├── kanbanleads/          # /kanbanleads ReUI @dnd-kit Kanban board
 │   │   ├── leads/                # /leads list, /leads/new, /leads/[id] 360 detail
 │   │   ├── tasks/                # /tasks task manager
 │   │   └── settings/             # /settings webhook keys & business profile
@@ -324,8 +305,7 @@ lost-leads/
 │   └── page.tsx                  # Public marketing landing page
 ├── components/                   # React UI Components
 │   ├── dashboard/                # CRM action center, status rail, dispatch chart, KPIs
-│   ├── leads/                    # Lead lists, import modal, notes composer, Kanban
-│   │   └── kanban/               # kanban-board.tsx, kanban-card.tsx
+│   ├── leads/                    # Lead lists, import modal, notes composer
 │   ├── originkit/                # Landing page sections (Hero, Features, Pricing)
 │   ├── shared/                   # Cross-cutting components (Sidebar, Navbar, Badges)
 │   ├── tasks/                    # Task list views, row items, create modals
@@ -333,8 +313,8 @@ lost-leads/
 ├── prisma/                       # Database schema and migrations
 │   ├── schema.prisma             # Core models (Business, Lead, Task, Activity, Auth.js)
 │   └── migrations/               # PostgreSQL migration history
-├── src/                          # Server services and reusable ReUI extensions
-│   ├── components/reui/          # ReUI Kanban (@dnd-kit primitives) & Badge
+├── src/                          # Server services and reusable extensions
+│   ├── components/reui/          # ReUI Badge
 │   └── server/
 │       ├── actions/              # Server Actions (lead.actions, task.action, setting)
 │       └── services/             # lead.service, task.service, business, email, auth

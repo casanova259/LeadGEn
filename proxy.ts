@@ -7,7 +7,6 @@ export default auth((req) => {
   const isProtected = [
     "/dashboard",
     "/leads",
-    "/kanbanleads",
     "/tasks",
     "/settings",
   ].some((path) => pathname.startsWith(path));
