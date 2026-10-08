@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -27,6 +28,7 @@ export function DispatchChart({
   trendDescription: string;
   totalInPeriod?: number;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   const hasData = dailyFlow.length > 0 && dailyFlow.some((d) => d.inbound > 0);
 
   // Determine Y-axis max domain with 4-5 even intervals
@@ -56,29 +58,42 @@ export function DispatchChart({
   };
 
   return (
-    <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--surface)] p-6">
-      {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-6">
-        <div>
-          <h2 className="font-heading text-[18px] font-normal text-[var(--ink)] tracking-tight">
-            Inbound Flow
-          </h2>
-          <p className="text-[13px] font-sans text-[var(--ink-muted)] mt-0.5">
-            {trendDescription}
-          </p>
+    <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--surface)] transition-all">
+      {/* Header section / Collapsible toggle */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-[var(--surface-raised)]/30 transition-colors rounded-[12px]"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex size-7 items-center justify-center rounded-[6px] bg-[var(--surface-raised)] text-[var(--ink-muted)] border border-[var(--hairline)]">
+            <TrendingUp size={14} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="font-heading text-[15px] font-normal text-[var(--ink)] tracking-tight">
+                Inbound Flow Trend
+              </h2>
+              {totalInPeriod !== undefined && (
+                <span className="font-mono text-[12px] text-[var(--ink-faint)]">
+                  ({totalInPeriod} active)
+                </span>
+              )}
+            </div>
+            <p className="text-[12px] font-sans text-[var(--ink-muted)]">
+              {trendDescription}
+            </p>
+          </div>
         </div>
 
-        {totalInPeriod !== undefined && (
-          <div className="text-right">
-            <span className="font-mono text-[20px] font-medium text-[var(--ink)] tabular-nums">
-              {totalInPeriod}
-            </span>
-            <span className="text-[12px] font-sans text-[var(--ink-muted)] ml-1.5">
-              total active
-            </span>
-          </div>
-        )}
-      </div>
+        <div className="flex items-center gap-2 text-[12px] font-sans text-[var(--ink-muted)]">
+          <span>{isOpen ? "Hide chart" : "View chart"}</span>
+          {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="px-6 pb-6 pt-2 border-t border-[var(--hairline)]">
 
       {!hasData ? (
         <div className="flex h-56 w-full flex-col items-center justify-center rounded-[8px] border border-dashed border-[var(--hairline)] bg-[var(--surface-raised)]/20 p-6 text-center">
@@ -170,6 +185,8 @@ export function DispatchChart({
               />
             </AreaChart>
           </ResponsiveContainer>
+        </div>
+      )}
         </div>
       )}
     </div>

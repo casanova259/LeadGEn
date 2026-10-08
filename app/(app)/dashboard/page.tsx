@@ -9,7 +9,6 @@ import { CrmHeader } from "@/components/dashboard/crm-header";
 import { StatusRail } from "@/components/dashboard/status-rail";
 import { DispatchChart } from "@/components/dashboard/dispatch-chart";
 import { CrmActionCenter } from "@/components/dashboard/crm-action-center";
-import { CrmRecentLeads } from "@/components/dashboard/crm-recent-leads";
 import { OnboardingChecklist } from "@/components/shared/onboarding-checklist";
 
 export default async function DashboardPage() {
@@ -24,7 +23,7 @@ export default async function DashboardPage() {
   const totalLeads = stats.totalLeads;
 
   return (
-    <div className="min-h-screen space-y-6 p-6 max-w-7xl mx-auto bg-[var(--bg)] text-[var(--ink)]">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto bg-[var(--bg)] text-[var(--ink)]">
       {/* 1. Header greeting & active action buttons */}
       <CrmHeader
         businessName={business.name}
@@ -37,7 +36,7 @@ export default async function DashboardPage() {
         <OnboardingChecklist businessId={business.id} />
       )}
 
-      {/* 3. Status Rail: Single bordered container with 3 columns & real status ticks */}
+      {/* 3. Status Rail: High-level KPI status overview */}
       <StatusRail
         totalLeads={stats.totalLeads}
         todaysLeads={stats.todaysLeads}
@@ -46,22 +45,19 @@ export default async function DashboardPage() {
         converted={stats.converted}
       />
 
-      {/* 4. Inbound Flow Chart: Area chart with plain-language trend & real current data */}
-      <DispatchChart
-        dailyFlow={activityAndFlow.dailyFlow}
-        trendDescription={activityAndFlow.trendDescription}
-        totalInPeriod={stats.totalLeads}
-      />
-
-      {/* 5. Rescue Queue Spotlight & Outreach Task Velocity */}
+      {/* 4. Rescue Queue Spotlight & Outreach Task Velocity (Primary Action Hub) */}
       <CrmActionCenter
         rescueQueue={rescueQueue}
         todayTasks={activityAndFlow.todayTasks}
         completedToday={stats.completedToday}
       />
 
-      {/* 6. Recent Inbound Opportunities Table */}
-      <CrmRecentLeads leads={activityAndFlow.recentLeads} />
+      {/* 5. Inbound Flow Trend: Collapsible secondary analytics */}
+      <DispatchChart
+        dailyFlow={activityAndFlow.dailyFlow}
+        trendDescription={activityAndFlow.trendDescription}
+        totalInPeriod={stats.totalLeads}
+      />
     </div>
   );
 }

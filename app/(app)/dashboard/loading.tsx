@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLoading() {
   return (
-    <div className="min-h-screen space-y-6 p-6 max-w-7xl mx-auto bg-[var(--bg)] text-[var(--ink)]">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto bg-[var(--bg)] text-[var(--ink)]">
       {/* Header skeleton */}
       <div className="flex items-baseline justify-between pb-4 border-b border-[var(--hairline)]">
         <div className="space-y-2">
@@ -29,19 +29,7 @@ export default function DashboardLoading() {
         ))}
       </div>
 
-      {/* Dispatch Chart skeleton */}
-      <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--surface)] p-6 space-y-4">
-        <div className="flex items-baseline justify-between">
-          <div className="space-y-1">
-            <Skeleton className="h-5 w-32 bg-[var(--surface-raised)]" />
-            <Skeleton className="h-3.5 w-64 bg-[var(--surface-raised)]/60" />
-          </div>
-          <Skeleton className="h-5 w-20 bg-[var(--surface-raised)]" />
-        </div>
-        <Skeleton className="h-64 w-full rounded-[8px] bg-[var(--surface-raised)]/30" />
-      </div>
-
-      {/* Action center split grid skeleton */}
+      {/* Action center split grid skeleton: Rescue Queue & Outreach Tasks */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
         <div className="xl:col-span-7 rounded-[12px] border border-[var(--hairline)] bg-[var(--surface)] p-6 space-y-4">
           <Skeleton className="h-5 w-36 bg-[var(--surface-raised)]" />
@@ -81,10 +69,16 @@ export default function DashboardLoading() {
         </div>
       </div>
 
-      {/* Recent opportunities table skeleton */}
-      <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--surface)] p-6 space-y-4">
-        <Skeleton className="h-5 w-44 bg-[var(--surface-raised)]" />
-        <Skeleton className="h-40 w-full rounded-[8px] bg-[var(--surface-raised)]/30" />
+      {/* Collapsible Dispatch Chart bar skeleton */}
+      <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--surface)] p-4 sm:p-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Skeleton className="size-7 rounded-[6px] bg-[var(--surface-raised)]" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-4 w-36 bg-[var(--surface-raised)]" />
+            <Skeleton className="h-3 w-56 bg-[var(--surface-raised)]/60" />
+          </div>
+        </div>
+        <Skeleton className="h-4 w-20 bg-[var(--surface-raised)]/60" />
       </div>
     </div>
   );
