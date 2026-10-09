@@ -38,6 +38,8 @@
   ],
   "exclude": [
     "node_modules",
-    "next-shadcn-admin-dashboard-main"
+    "next-shadcn-admin-dashboard-main",
+    "scripts",
+    "tests"
   ]
 }
