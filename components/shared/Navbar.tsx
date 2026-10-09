@@ -54,7 +54,7 @@ export function Navbar({
     quickCreateHref ? quickCreateLabel : routeConfig.quickCreateLabel ?? quickCreateLabel;
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-[var(--hairline)] bg-[var(--surface)] px-8 text-[var(--ink)]">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--hairline)] bg-[var(--surface)] px-8 text-[var(--ink)]">
       <span className="font-heading text-[17px] font-normal text-[var(--ink)] tracking-tight">{resolvedTitle}</span>
 
       <div className="flex items-center gap-3">

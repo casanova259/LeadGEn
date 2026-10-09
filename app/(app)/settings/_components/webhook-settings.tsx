@@ -28,7 +28,7 @@ export function WebhookSettings({ businessId }: { businessId: string }) {
   };
 
   return (
-    <div className="space-y-6 mt-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
       {/* Website Lead Webhook */}
       <Card className="border-border bg-card">
         <CardHeader>
@@ -45,7 +45,7 @@ export function WebhookSettings({ businessId }: { businessId: string }) {
                 id="webhook-url"
                 readOnly
                 value={webWebhookUrl}
-                className="font-mono text-xs bg-muted/50"
+                className="font-mono text-xs bg-muted/50 min-w-0 flex-1 truncate"
               />
               <Button
                 type="button"
@@ -65,7 +65,7 @@ export function WebhookSettings({ businessId }: { businessId: string }) {
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Example cURL Request
             </Label>
-            <pre className="p-3 bg-muted rounded-md text-xs font-mono overflow-x-auto text-foreground">
+            <pre className="p-3 bg-muted/60 border border-[var(--hairline)] rounded-md text-xs font-mono whitespace-pre-wrap break-all overflow-x-auto scrollbar-none text-foreground">
 {`curl -X POST "${webWebhookUrl}" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -81,7 +81,7 @@ export function WebhookSettings({ businessId }: { businessId: string }) {
             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Example HTML Form Submission
             </Label>
-            <pre className="p-3 bg-muted rounded-md text-xs font-mono overflow-x-auto text-foreground">
+            <pre className="p-3 bg-muted/60 border border-[var(--hairline)] rounded-md text-xs font-mono whitespace-pre-wrap break-all overflow-x-auto scrollbar-none text-foreground">
 {`<form action="${webWebhookUrl}" method="POST">
   <input type="text" name="name" placeholder="Your Name" required />
   <input type="email" name="email" placeholder="Email" />
@@ -110,7 +110,7 @@ export function WebhookSettings({ businessId }: { businessId: string }) {
                 id="wa-webhook-url"
                 readOnly
                 value={waWebhookUrl}
-                className="font-mono text-xs bg-muted/50"
+                className="font-mono text-xs bg-muted/50 min-w-0 flex-1 truncate"
               />
               <Button
                 type="button"

@@ -27,7 +27,7 @@ export function AppSidebar({
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-[var(--hairline)] bg-[var(--surface)] text-[var(--ink-muted)] font-sans">
+    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-[var(--hairline)] bg-[var(--surface)] text-[var(--ink-muted)] font-sans overflow-y-auto scrollbar-none">
       {/* Business / logo */}
       <div className="flex h-16 items-center gap-2.5 px-5 border-b border-[var(--hairline)]">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--surface-raised)] text-[var(--accent-blue)] border border-[var(--hairline)]">

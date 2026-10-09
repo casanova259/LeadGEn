@@ -234,3 +234,29 @@
 .animate-lead-highlight {
   animation: lead-highlight-flash 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
+
+/* Hide scrollbars across browsers while keeping smooth scrolling */
+.scrollbar-none,
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+  width: 0;
+  height: 0;
+}
+
+/* Code blocks and pre elements scrollbar cleanup */
+pre {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+pre::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}

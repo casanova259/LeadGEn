@@ -24,11 +24,11 @@ export default async function AppLayout({
     <SidebarProvider>
       <TooltipProvider>
         <ThemeScope />
-        <div className="flex min-h-screen w-full bg-background text-foreground">
+        <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
           <AppSidebar businessName={business.name} rescueCount={rescueCount} />
-          <div className="flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col h-full min-w-0 overflow-hidden">
             <Navbar authUser={authUser} />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 overflow-y-auto min-w-0 scrollbar-none">{children}</main>
             <Toasts position="top-center" />
           </div>
         </div>
