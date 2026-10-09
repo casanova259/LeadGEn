@@ -4,37 +4,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "motion/react";
 import SpotlightReveal from "@/components/originkit/ui/hero-01/spotlight-reveal";
-import TrustedBy from "@/components/originkit/ui/hero-01/trusted-by";
 
 const easeOutCubic = [0.215, 0.61, 0.355, 1] as const;
-
-/**
- * The original OriginKit package points TRUSTED_LOGOS at SVG files that
- * weren't included in the delivered zip (logo-2.svg, logo-3.svg, logo-4.svg).
- * Rather than leave broken <img> tags, we generate simple text-wordmark SVGs
- * on the fly (as data URIs) using your real customer names from the existing
- * Lost Leads page. TrustedBy itself is untouched — it just receives
- * different `src` values.
- */
-function textLogoDataUri(label: string) {
-  const charWidth = 8.4;
-  const width = Math.max(60, Math.round(label.length * charWidth));
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="22" viewBox="0 0 ${width} 22"><text x="0" y="16" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#1a1a1a">${label}</text></svg>`;
-  return { src: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`, width, height: 22 };
-}
-
-const TRUSTED_NAMES = [
-  "Bloom Dental",
-  "Northside Realty",
-  "Studio Verve",
-  "Clearline Legal",
-  "Aster Med Spa",
-];
-
-const TRUSTED_LOGOS = TRUSTED_NAMES.map((name) => ({
-  alt: name,
-  ...textLogoDataUri(name),
-}));
 
 /** Inline replacement for the missing logo-mark.svg — the real Lost Leads mark. */
 const LogoMark = () => (
@@ -224,7 +195,6 @@ const Hero01Content = () => {
   const [showHero, setShowHero] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [showCtas, setShowCtas] = useState(false);
-  const [showTrusted, setShowTrusted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -232,7 +202,6 @@ const Hero01Content = () => {
     setShowHero(true);
     setShowDescription(true);
     setShowCtas(true);
-    setShowTrusted(true);
   }, [prefersReducedMotion]);
 
   const handleNavComplete = () => {
@@ -249,12 +218,11 @@ const Hero01Content = () => {
   const handleDescriptionComplete = () => {
     if (prefersReducedMotion) return;
     setShowCtas(true);
-    setShowTrusted(true);
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-white px-3 pt-2.5 text-[#010110]">
-      <section
+    <section className="overflow-x-hidden bg-white px-3 pt-2.5 pb-0 text-[#010110]">
+      <div
         aria-labelledby="lostleads-hero-heading"
         className="relative mx-auto w-full overflow-hidden md:rounded-[10px] bg-gradient-to-b from-orange-50 via-white to-neutral-50 bg-cover bg-center pb-0 rounded-[10px] ipad:pb-10 desktop-sm:min-h-200"
       >
@@ -412,11 +380,8 @@ const Hero01Content = () => {
 
           <BrowserPreview active={showHero} />
         </div>
-      </section>
-      <div className="relative z-10 mt-0 flex flex-col items-center px-4 pt-13.5 md:pt-17.5 pb-12 ipad:px-6 ipad:pb-16 laptop:pb-20">
-        <TrustedBy logos={TRUSTED_LOGOS} active={showTrusted} />
       </div>
-    </main>
+    </section>
   );
 };
 

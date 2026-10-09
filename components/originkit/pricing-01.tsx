@@ -319,11 +319,11 @@ const Pricing01 = () => {
   const { isYearly, toggleBillingCycle } = useBillingCycle();
 
   return (
-    <main
+    <section
       id="pricing"
-      className="min-h-screen bg-[#f4f1f0] px-4 py-16 text-[#111] sm:px-6 sm:py-24"
+      className="bg-[#f4f1f0] px-4 py-16 text-[#111] sm:px-6 sm:py-20"
     >
-      <section
+      <div
         aria-labelledby="pricing-heading"
         className="mx-auto flex w-full max-w-7xl flex-col items-center gap-10"
       >
@@ -477,8 +477,8 @@ const Pricing01 = () => {
             </ul>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </section>
   );
 };
 
