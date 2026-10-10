@@ -8,10 +8,21 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   session: {
     strategy: "database",
   },
+  pages: {
+    signIn: "/sign-in",
+  },
   providers: [
     Resend({
       from: process.env.RESEND_FROM_EMAIL || "Lost Leads <onboarding@resend.dev>",
     }),
   ],
   trustHost: true,
+  callbacks: {
+    session({ session, user }) {
+      if (session.user && user) {
+        session.user.id = user.id;
+      }
+      return session;
+    },
+  },
 });

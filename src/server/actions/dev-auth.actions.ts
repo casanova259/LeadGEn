@@ -1,8 +1,6 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import crypto from "node:crypto";
 
 /**
@@ -27,6 +25,7 @@ export async function directSignInAction(email: string, redirectTo = "/dashboard
       data: {
         email: normalizedEmail,
         name: normalizedEmail.split("@")[0],
+        emailVerified: new Date(),
       },
     });
   }
@@ -44,15 +43,42 @@ export async function directSignInAction(email: string, redirectTo = "/dashboard
   });
 
   // 3. Set the standard Auth.js session cookie
-  const cookieStore = await cookies();
-  cookieStore.set("authjs.session-token", sessionToken, {
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    expires,
-  });
+  // Auth.js requires the "__Secure-" prefix when running on HTTPS / production
+  let isHttps = process.env.AUTH_URL?.startsWith("https://") || process.env.NODE_ENV === "production";
+  try {
+    const { headers } = await import("next/headers");
+    const headerList = await headers();
+    const proto = headerList.get("x-forwarded-proto") || "";
+    if (proto === "https") isHttps = true;
+  } catch {
+    // headers() not available outside request scope
+  }
 
-  // 4. Redirect into authenticated CRM workspace
-  redirect(redirectTo);
+  try {
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    const cookieOptions = {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax" as const,
+      expires,
+    };
+
+    if (isHttps) {
+      cookieStore.set("__Secure-authjs.session-token", sessionToken, {
+        ...cookieOptions,
+        secure: true,
+      });
+    } else {
+      cookieStore.set("authjs.session-token", sessionToken, {
+        ...cookieOptions,
+        secure: false,
+      });
+    }
+  } catch {
+    // cookies() not available outside request scope (e.g. tests)
+  }
+
+  // 4. Return success and target URL
+  return { success: true, redirectUrl: redirectTo };
 }

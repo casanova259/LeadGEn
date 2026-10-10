@@ -32,7 +32,11 @@ export function SignInForm({ redirectTo = "/dashboard" }: { redirectTo?: string 
     setError(null);
 
     try {
-      await directSignInAction(finalEmail, redirectTo);
+      const result = await directSignInAction(finalEmail, redirectTo);
+      if (result?.success) {
+        window.location.href = result.redirectUrl || redirectTo;
+        return;
+      }
     } catch (err) {
       console.error(err);
       setError("Failed to create session. Please check your database connection.");

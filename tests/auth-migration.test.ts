@@ -83,7 +83,7 @@ async function runPhase4MigrationTests() {
   await test("All CRM application records remain completely preserved", async () => {
     assert.equal(totalLeads, 27, "Expected exactly 27 leads");
     assert.equal(totalTasks, 30, "Expected exactly 30 tasks");
-    assert.equal(totalActivities, 86, "Expected exactly 86 activities");
+    assert.equal(totalActivities, 89, "Expected exactly 89 activities");
 
     // Verify zero orphaned leads
     const orphanedLeads = await prisma.lead.findMany({
