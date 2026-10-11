@@ -13,6 +13,7 @@ export default auth((req) => {
 
   if (isProtected && !isAuth) {
     const signInUrl = new URL("/sign-in", req.nextUrl.origin);
+    signInUrl.searchParams.set("callbackUrl", pathname);
     return Response.redirect(signInUrl);
   }
 });

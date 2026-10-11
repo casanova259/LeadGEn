@@ -25,7 +25,7 @@ Clinics, coaching institutes, gyms, salons, local agencies, real estate brokers,
 | Backend | Next.js Route Handlers, Server Actions |
 | Database | Supabase (PostgreSQL) |
 | ORM | Prisma |
-| Auth | Auth.js (NextAuth v5) + Prisma Adapter |
+| Auth | Auth.js (NextAuth v5) Credentials & JWT Sessions |
 | Email | Resend |
 | Charts | Recharts |
 | Deployment | Vercel |

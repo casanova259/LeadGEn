@@ -23,7 +23,7 @@ export default async function SignInPage() {
           </div>
           <h1 className="text-xl font-heading font-semibold tracking-tight">Sign in to Lost Leads</h1>
           <p className="text-xs text-muted-foreground">
-            Enter your email to receive a secure passwordless sign-in link.
+            Enter your email and password to access your dashboard.
           </p>
         </div>
 

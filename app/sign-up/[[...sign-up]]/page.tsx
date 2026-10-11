@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SignInForm } from "@/components/auth/sign-in-form";
+import { SignUpForm } from "@/components/auth/sign-up-form";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
@@ -23,17 +23,18 @@ export default async function SignUpPage() {
           </div>
           <h1 className="text-xl font-heading font-semibold tracking-tight">Create your Lost Leads account</h1>
           <p className="text-xs text-muted-foreground">
-            Get started in seconds with a secure passwordless sign-in link.
+            Get started in seconds with your email and password.
           </p>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-          <SignInForm />
+          <SignUpForm />
         </div>
 
         <p className="text-center text-[11px] text-muted-foreground">
-          Already have an account?{" "}
-          <Link href="/sign-in" className="underline hover:text-foreground">Sign in</Link>
+          By signing up, you agree to our{" "}
+          <Link href="/" className="underline hover:text-foreground">Terms</Link> and{" "}
+          <Link href="/" className="underline hover:text-foreground">Privacy Policy</Link>.
         </p>
       </div>
     </div>
