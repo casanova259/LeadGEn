@@ -39,14 +39,9 @@ export async function createLead(input: CreateLeadInput) {
     data: { leadId: lead.id, type: "LEAD_CREATED" },
   });
 
-  // Auto follow-up task, 24h out
-  await prisma.task.create({
-    data: {
-      leadId: lead.id,
-      type: "FOLLOW_UP",
-      dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    },
-  });
+  // Idempotent initial follow-up task, 24h out
+  const { ensureInitialFollowUpTask } = await import("@/src/server/services/ai-followup.service");
+  await ensureInitialFollowUpTask(lead.id);
 
   return lead;
 }
@@ -203,13 +198,8 @@ export async function batchImportLeads(
       });
 
       if (autoTasks) {
-        await prisma.task.create({
-          data: {
-            leadId: lead.id,
-            type: "FOLLOW_UP",
-            dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          },
-        });
+        const { ensureInitialFollowUpTask } = await import("@/src/server/services/ai-followup.service");
+        await ensureInitialFollowUpTask(lead.id);
       }
 
       importedCount++;

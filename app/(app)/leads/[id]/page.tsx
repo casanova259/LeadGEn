@@ -23,6 +23,8 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { LeadNoteComposer } from "@/components/leads/lead-note-composer";
+import { AiFollowUpCard } from "@/components/leads/ai-followup-card";
+import { getAiFollowUpRecommendation } from "@/src/server/services/ai-followup.service";
 
 function formatRelative(date: Date) {
   const hrs = Math.floor((Date.now() - new Date(date).getTime()) / 36e5);
@@ -57,6 +59,29 @@ export default async function LeadDetailPage({
     lead.priority === "HOT" &&
     lead.status === "NEW" &&
     new Date(lead.createdAt).getTime() < Date.now() - 24 * 60 * 60 * 1000;
+
+  const recentNotes = lead.activities
+    .filter((a) => {
+      const meta = a.metadata as Record<string, unknown> | null;
+      return meta?.action === "NOTE_ADDED" && typeof meta?.note === "string";
+    })
+    .map((a) => String((a.metadata as Record<string, unknown>).note))
+    .slice(0, 3);
+
+  const initialAiRec = await getAiFollowUpRecommendation({
+    id: lead.id,
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    source: lead.source,
+    status: lead.status,
+    priority: lead.priority,
+    notes: lead.notes,
+    createdAt: lead.createdAt,
+    businessName: business.name,
+    industry: business.industry,
+    recentNotes,
+  });
 
   return (
     <div className="p-6 max-w-6xl space-y-6">
@@ -232,8 +257,15 @@ export default async function LeadDetailPage({
           </Card>
         </div>
 
-        {/* Right Column: Interaction Logger & Activity Timeline */}
+        {/* Right Column: AI Follow-Up Strategy, Interaction Logger & Activity Timeline */}
         <div className="lg:col-span-5 space-y-6">
+          <AiFollowUpCard
+            leadId={lead.id}
+            leadPhone={lead.phone}
+            leadEmail={lead.email}
+            initialRecommendation={initialAiRec}
+          />
+
           <LeadNoteComposer leadId={lead.id} />
 
           <Card className="border-border bg-card">

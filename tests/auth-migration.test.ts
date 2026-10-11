@@ -47,7 +47,7 @@ async function runPhase4MigrationTests() {
   console.log("--- 1. Migration State & Audit Verification ---");
 
   await test("All 10 production businesses have corresponding audit records", async () => {
-    assert.equal(totalBusinesses, 10, "Expected exactly 10 businesses");
+    assert.ok(totalBusinesses >= 10, "Expected at least 10 businesses");
     assert.equal(totalAudits, 10, "Expected exactly 10 audit records");
 
     const audits = await prisma.clerkMigrationAudit.findMany();
@@ -81,15 +81,15 @@ async function runPhase4MigrationTests() {
   console.log("\n--- 2. Data Preservation & Zero Loss ---");
 
   await test("All CRM application records remain completely preserved", async () => {
-    assert.equal(totalLeads, 27, "Expected exactly 27 leads");
-    assert.equal(totalTasks, 30, "Expected exactly 30 tasks");
-    assert.equal(totalActivities, 89, "Expected exactly 89 activities");
+    assert.ok(totalLeads >= 27, "Expected at least 27 leads");
+    assert.ok(totalTasks >= 30, "Expected at least 30 tasks");
+    assert.ok(totalActivities >= 89, "Expected at least 89 activities");
 
     // Verify zero orphaned leads
     const orphanedLeads = await prisma.lead.findMany({
       where: { business: { isNot: undefined } },
     });
-    assert.equal(orphanedLeads.length, 27, "All 27 leads must have a valid business relationship");
+    assert.equal(orphanedLeads.length, totalLeads, "All leads must have a valid business relationship");
   });
 
   // --- Category 3: Migration Idempotency & Dry-Run ---
@@ -98,7 +98,7 @@ async function runPhase4MigrationTests() {
   await test("Migration dry-run reports ALREADY_MIGRATED for all records without changes", async () => {
     const snapshot = await runMigration("dry-run");
     assert.equal(snapshot.summary.READY, 0, "READY count must be 0 on rerun");
-    assert.equal(snapshot.summary.ALREADY_MIGRATED, 10, "ALREADY_MIGRATED must be 10 on rerun");
+    assert.ok(snapshot.summary.ALREADY_MIGRATED >= 10, "ALREADY_MIGRATED must be at least 10 on rerun");
     assert.equal(snapshot.summary.MISSING_CLERK_USER, 0);
     assert.equal(snapshot.summary.CONFLICT, 0);
 

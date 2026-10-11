@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { importLeadsAction } from "@/src/server/actions/lead.actions";
 import {
-  Upload,
   FileSpreadsheet,
   CheckCircle2,
   AlertCircle,
@@ -20,6 +19,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { Folder } from "@/components/ui/folder";
 
 interface ImportLeadsDialogProps {
   open: boolean;
@@ -258,8 +258,8 @@ export function ImportLeadsDialog({ open, onOpenChange }: ImportLeadsDialogProps
               onClick={() => fileInputRef.current?.click()}
               className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/80 bg-muted/20 p-8 text-center hover:bg-muted/40 transition cursor-pointer"
             >
-              <div className="size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                <Upload className="size-6" />
+              <div className="py-2 flex items-center justify-center">
+                <Folder size="sm" color="blue" />
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">
