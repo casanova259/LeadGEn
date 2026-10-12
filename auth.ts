@@ -4,8 +4,22 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+// Prevent Vercel production from accidentally using localhost if AUTH_URL was copied from .env
+if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+  if (process.env.AUTH_URL && process.env.AUTH_URL.includes("localhost")) {
+    delete process.env.AUTH_URL;
+  }
+  if (process.env.NEXTAUTH_URL && process.env.NEXTAUTH_URL.includes("localhost")) {
+    delete process.env.NEXTAUTH_URL;
+  }
+}
+
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  secret:
+    process.env.AUTH_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    "2d703c27fb3cbfcf054418280fd3602b5e77f527e95de2db0d8c1371f91268a8",
   session: {
     strategy: "jwt",
   },
