@@ -1,8 +1,14 @@
 import { auth } from "@/auth";
 
 export default auth((req) => {
-  const isAuth = !!req.auth;
   const { pathname } = req.nextUrl;
+
+  // Never intercept Auth.js internal endpoints
+  if (pathname.startsWith("/api/auth")) {
+    return;
+  }
+
+  const isAuth = !!req.auth;
 
   const isProtected = [
     "/dashboard",
@@ -20,7 +26,6 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
