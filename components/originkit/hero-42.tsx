@@ -495,11 +495,6 @@ export default function Hero42({
                 seed={0}
               />
 
-              <div className="card__head card__head--l">
-                <img src="/hero-42/logo-inmix-a.svg" alt="Lost Leads" />
-                <span>lostleads.app</span>
-              </div>
-
               <div className="widget">
                 <div className="dates">
                   <div className="dates__row">
@@ -578,11 +573,6 @@ export default function Hero42({
                 colors="#0C201AFF,#0C2755FF,#093A47FF"
                 seed={137}
               />
-
-              <div className="card__head card__head--c">
-                <img src="/hero-42/logo-inmix-b.svg" alt="Lost Leads" />
-                <span>lostleads.app</span>
-              </div>
 
               <div className="draft panel panel--2">
                 <div className="panel__head">
@@ -677,11 +667,6 @@ export default function Hero42({
                 colors="#0C1528FF,#17243CFF,#212F45FF"
                 seed={291}
               />
-
-              <div className="card__head card__head--l">
-                <img src="/hero-42/logo-inmix-a.svg" alt="Lost Leads" />
-                <span>lostleads.app</span>
-              </div>
 
               <div className="stats">
                 <div className="stat">
