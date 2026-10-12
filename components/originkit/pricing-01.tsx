@@ -321,14 +321,14 @@ const Pricing01 = () => {
   return (
     <section
       id="pricing"
-      className="bg-[#f4f1f0] px-4 py-16 text-[#111] sm:px-6 sm:py-20"
+      className="bg-white px-4 py-16 text-[#111] sm:px-6 sm:py-20"
     >
       <div
         aria-labelledby="pricing-heading"
         className="mx-auto flex w-full max-w-7xl flex-col items-center gap-10"
       >
         <header className="flex max-w-101.25 lg:max-w-205 flex-col items-center gap-4 text-center">
-          <span className="rounded-full bg-white px-2.5 py-2 text-base font-medium leading-none shadow-[0px_1px_0.5px_rgba(0,0,0,0.1)]">
+          <span className="rounded-full bg-white px-2.5 py-2 text-base font-medium leading-none shadow-[0px_1px_0.5px_rgba(0,0,0,0.1)] border border-[#eae4e2]">
             Pricing &amp; Plans
           </span>
           <div className="flex flex-col items-center gap-3.5">
