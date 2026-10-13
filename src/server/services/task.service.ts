@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { TaskType, Prisma } from "@prisma/client";
 
@@ -178,7 +179,7 @@ export async function getRescueQueue(businessId: string) {
   });
 }
 
-export async function getRescueQueueCount(businessId: string) {
+export const getRescueQueueCount = cache(async function getRescueQueueCount(businessId: string) {
   const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
   return prisma.lead.count({
     where: {
@@ -188,7 +189,7 @@ export async function getRescueQueueCount(businessId: string) {
       createdAt: { lt: cutoff },
     },
   });
-}
+});
 
 export async function getLeadAnalytics(businessId: string) {
   const [bySource, byStatus] = await Promise.all([
@@ -218,36 +219,52 @@ export async function getLeadAnalytics(businessId: string) {
 export async function getDashboardStats(businessId: string) {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
+  const now = new Date();
 
-  const [
-    todaysLeads,
-    pendingTasks,
-    hotLeads,
-    converted,
-    lost,
-    overdueTasks,
-    totalLeads,
-    completedToday,
-  ] = await Promise.all([
-    prisma.lead.count({ where: { businessId, createdAt: { gte: startOfDay } } }),
-    prisma.task.count({ where: { lead: { businessId }, status: "PENDING" } }),
-    prisma.lead.count({
-      where: { businessId, priority: "HOT", status: { notIn: ["CONVERTED", "LOST"] } },
+  // Consolidate into 2 parallel queries instead of 8 separate remote queries
+  const [leads, tasks] = await Promise.all([
+    prisma.lead.findMany({
+      where: { businessId },
+      select: {
+        status: true,
+        priority: true,
+        createdAt: true,
+      },
     }),
-    prisma.lead.count({ where: { businessId, status: "CONVERTED" } }),
-    prisma.lead.count({ where: { businessId, status: "LOST" } }),
-    prisma.task.count({
-      where: { lead: { businessId }, status: "PENDING", dueAt: { lt: new Date() } },
-    }),
-    prisma.lead.count({ where: { businessId } }),
-    prisma.task.count({
-      where: {
-        lead: { businessId },
-        status: "COMPLETED",
-        completedAt: { gte: startOfDay },
+    prisma.task.findMany({
+      where: { lead: { businessId } },
+      select: {
+        status: true,
+        dueAt: true,
+        completedAt: true,
       },
     }),
   ]);
+
+  let todaysLeads = 0;
+  let hotLeads = 0;
+  let converted = 0;
+  let lost = 0;
+
+  for (const lead of leads) {
+    if (lead.createdAt >= startOfDay) todaysLeads++;
+    if (lead.priority === "HOT" && lead.status !== "CONVERTED" && lead.status !== "LOST") hotLeads++;
+    if (lead.status === "CONVERTED") converted++;
+    if (lead.status === "LOST") lost++;
+  }
+
+  let pendingTasks = 0;
+  let overdueTasks = 0;
+  let completedToday = 0;
+
+  for (const task of tasks) {
+    if (task.status === "PENDING") {
+      pendingTasks++;
+      if (task.dueAt < now) overdueTasks++;
+    } else if (task.status === "COMPLETED") {
+      if (task.completedAt && task.completedAt >= startOfDay) completedToday++;
+    }
+  }
 
   return {
     todaysLeads,
@@ -256,42 +273,12 @@ export async function getDashboardStats(businessId: string) {
     converted,
     lost,
     overdueTasks,
-    totalLeads,
+    totalLeads: leads.length,
     completedToday,
   };
 }
 
 export async function getDashboardActivityAndFlow(businessId: string) {
-  const now = new Date();
-
-  // 6-month monthly flow
-  const monthsData: { month: string; date: string; leads: number; converted: number }[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const nextD = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
-    const [leadCount, convertedCount] = await Promise.all([
-      prisma.lead.count({
-        where: {
-          businessId,
-          createdAt: { gte: d, lt: nextD },
-        },
-      }),
-      prisma.lead.count({
-        where: {
-          businessId,
-          status: "CONVERTED",
-          updatedAt: { gte: d, lt: nextD },
-        },
-      }),
-    ]);
-
-    monthsData.push({
-      month: d.toLocaleString("en-US", { month: "short" }),
-      date: d.toISOString(),
-      leads: leadCount,
-      converted: convertedCount,
-    });
-  }
 
   // Real daily flow: only plot real, current data up to today (no future days, no long flat baseline)
   const nowDay = new Date();
@@ -423,7 +410,7 @@ export async function getDashboardActivityAndFlow(businessId: string) {
   });
 
   return {
-    monthlyFlow: monthsData,
+    monthlyFlow: [],
     dailyFlow,
     trendDescription,
     todayTasks,

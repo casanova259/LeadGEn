@@ -57,6 +57,7 @@ export function AppSidebar({
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 className={`flex items-center justify-between gap-2 rounded-[8px] px-3 py-2 text-[13px] font-sans transition-colors ${
                   active
                     ? "bg-[var(--surface-raised)] text-[var(--ink)] font-medium"

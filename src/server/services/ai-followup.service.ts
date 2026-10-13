@@ -147,7 +147,7 @@ Return ONLY a JSON object with this exact shape:
   "rationale": "1 brief sentence explaining the strategy"
 }`;
 
-    const response = await ai.models.generateContent({
+    const generatePromise = ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {
@@ -155,6 +155,12 @@ Return ONLY a JSON object with this exact shape:
         temperature: 0.2,
       },
     });
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("AI generation timed out after 2500ms")), 2500)
+    );
+
+    const response = (await Promise.race([generatePromise, timeoutPromise])) as Awaited<typeof generatePromise>;
 
     const text = response.text?.trim();
     if (!text) {
