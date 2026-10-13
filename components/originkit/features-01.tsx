@@ -120,6 +120,25 @@ const AutoTaskMock = () => (
   </div>
 );
 
+const STATUS_CONFIG: Record<string, { className: string; dot: string }> = {
+  HOT: {
+    className: "bg-rose-50 text-rose-700 border border-rose-200/80",
+    dot: "bg-rose-500",
+  },
+  NEW: {
+    className: "bg-blue-50 text-blue-700 border border-blue-200/80",
+    dot: "bg-blue-500",
+  },
+  CONTACTED: {
+    className: "bg-purple-50 text-purple-700 border border-purple-200/80",
+    dot: "bg-purple-500",
+  },
+  CONVERTED: {
+    className: "bg-emerald-50 text-emerald-700 border border-emerald-200/80",
+    dot: "bg-emerald-500",
+  },
+};
+
 const LeadListMock = () => (
   <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-lg ring-1 ring-neutral-100">
     <p className="mb-3 text-sm font-semibold text-neutral-900">All leads</p>
@@ -129,14 +148,26 @@ const LeadListMock = () => (
         ["Marcus Diallo", "NEW"],
         ["Elena Torres", "CONTACTED"],
         ["Sam Okafor", "CONVERTED"],
-      ].map(([name, status]) => (
-        <div key={name} className="flex items-center justify-between rounded-lg px-2.5 py-1.5 hover:bg-neutral-50">
-          <span className="font-medium text-neutral-800">{name}</span>
-          <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[11px] font-semibold text-neutral-500">
-            {status}
-          </span>
-        </div>
-      ))}
+      ].map(([name, status]) => {
+        const config = STATUS_CONFIG[status] ?? {
+          className: "bg-neutral-100 text-neutral-600 border border-neutral-200/60",
+          dot: "bg-neutral-400",
+        };
+        return (
+          <div
+            key={name}
+            className="flex items-center justify-between rounded-lg px-2.5 py-1.5 hover:bg-neutral-50 transition-colors"
+          >
+            <span className="font-medium text-neutral-800">{name}</span>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${config.className}`}
+            >
+              <span className={`size-1.5 rounded-full ${config.dot}`} />
+              {status}
+            </span>
+          </div>
+        );
+      })}
     </div>
   </div>
 );
