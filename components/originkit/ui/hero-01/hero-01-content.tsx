@@ -83,7 +83,7 @@ const RESCUE_LEADS = [
 ];
 
 const RescueQueuePreview = () => (
-  <div className="relative overflow-hidden rounded-[5.5px] ipad:rounded-[9.5px] bg-gradient-to-b from-orange-50 via-white to-neutral-50 p-6 sm:p-8">
+  <div className="relative overflow-hidden rounded-t-[14px] rounded-b-none bg-gradient-to-b from-orange-50 via-white to-neutral-50 p-6 sm:p-8 pb-10 border border-b-0 border-neutral-200/60 shadow-[0_-4px_24px_rgba(0,0,0,0.04)]">
     <div className="mb-5 flex items-center gap-1.5">
       <span className="h-2.5 w-2.5 rounded-full bg-neutral-200" />
       <span className="h-2.5 w-2.5 rounded-full bg-neutral-200" />
@@ -101,7 +101,7 @@ const RescueQueuePreview = () => (
       {RESCUE_LEADS.map((lead) => (
         <div
           key={lead.name}
-          className="flex items-center justify-between rounded-2xl bg-white p-3.5 ring-1 ring-neutral-100"
+          className="flex items-center justify-between rounded-2xl bg-white p-3.5 ring-1 ring-neutral-100 shadow-xs"
         >
           <div className="flex items-center gap-3">
             <span className={`h-2 w-2 shrink-0 rounded-full ${lead.color}`} />
@@ -117,7 +117,7 @@ const RescueQueuePreview = () => (
 
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-24 bg-linear-to-t from-[#f4f0e8] from-0% via-[#f4f0e8]/85 via-30% to-transparent ipad:h-28 laptop:h-32"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-20 bg-linear-to-t from-white via-white/80 to-transparent"
     />
   </div>
 );
@@ -130,7 +130,7 @@ const BrowserPreview = ({ active }: { active: boolean }) => {
 
   return (
     <motion.div
-      className="relative mx-auto mt-4 mb-[-72px] w-full min-w-0 max-w-[56rem] self-center will-change-transform ipad:mb-0 ipad:mt-6 laptop:mt-8"
+      className="relative mx-auto mt-auto w-full min-w-0 max-w-[56rem] self-center will-change-transform pt-8 sm:pt-12"
       initial={hidden}
       animate={active ? visible : hidden}
       transition={{
@@ -139,7 +139,7 @@ const BrowserPreview = ({ active }: { active: boolean }) => {
         ease: easeOutCubic,
       }}
     >
-      <div className="translate-y-6 rounded-[14px] bg-[#f4f0e8] p-[8.5px] shadow-[0_0_6px_1px_rgba(0,0,0,0.05),0_0_200px_rgba(0,0,0,0.08),0_15px_20px_-17px_rgba(0,0,0,0.13),0_7px_14px_-10px_rgba(0,0,0,0.08)] ipad:translate-y-14 ipad:rounded-[18px]">
+      <div className="rounded-t-[20px] rounded-b-none bg-[#f4f0e8] p-[8.5px] pb-0 shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
         <RescueQueuePreview />
       </div>
     </motion.div>
@@ -221,14 +221,14 @@ const Hero01Content = () => {
   };
 
   return (
-    <section className="overflow-x-hidden bg-white px-3 pt-2.5 pb-0 text-[#010110]">
+    <section className="relative w-full min-h-screen overflow-x-hidden bg-gradient-to-b from-orange-50 via-white to-neutral-50 text-[#010110] flex flex-col justify-between">
       <div
         aria-labelledby="lostleads-hero-heading"
-        className="relative mx-auto w-full overflow-hidden md:rounded-[10px] bg-gradient-to-b from-orange-50 via-white to-neutral-50 bg-cover bg-center pb-0 rounded-[10px] ipad:pb-10 desktop-sm:min-h-200"
+        className="relative mx-auto w-full flex-1 flex flex-col items-center justify-between px-3 pt-3 pb-0 ipad:px-4 ipad:pt-4 ipad:pb-0"
       >
-        <div className="relative z-10 flex w-full flex-col items-center px-3 pt-3 ipad:px-4 ipad:pt-4">
+        <div className="relative z-10 flex w-full flex-1 flex flex-col items-center justify-between">
           <motion.header
-            className="flex w-full max-w-150.5 items-center justify-between gap-2 rounded-full border border-white bg-white px-2.5 py-1.5 shadow-[0_0_0.5px_rgba(0,0,0,0.5)] ipad:gap-3 ipad:px-3 ipad:py-2"
+            className="flex w-full max-w-150.5 items-center justify-between gap-2 rounded-full border border-white/80 bg-white/90 backdrop-blur-md px-2.5 py-1.5 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ipad:gap-3 ipad:px-3 ipad:py-2"
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -28 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{
@@ -329,7 +329,7 @@ const Hero01Content = () => {
 
           <div
             id="main"
-            className="mt-[62px] flex w-full max-w-162.75 scroll-mt-24 flex-col items-center gap-7 text-center iphone:mt-12 ipad:mt-16 ipad:gap-10 laptop:mt-31.5"
+            className="mt-14 flex w-full max-w-162.75 scroll-mt-24 flex-col items-center gap-7 text-center iphone:mt-18 ipad:mt-24 ipad:gap-9 laptop:mt-28"
           >
             <div className="flex w-full flex-col items-center gap-3 ipad:gap-3.5">
               <SpotlightReveal
