@@ -104,8 +104,8 @@ export default async function LeadDetailPage({
             </span>
             <div>
               <p className="font-semibold text-sm text-foreground">In Rescue Queue: No contact in &gt;24 hours</p>
-              <p className="text-xs text-muted-foreground">
-                This inquiry was received {formatRelative(lead.createdAt)} and has not had direct contact. Reach out immediately.
+              <p className="text-xs text-muted-foreground" suppressHydrationWarning>
+                This inquiry was received <span suppressHydrationWarning>{formatRelative(lead.createdAt)}</span> and has not had direct contact. Reach out immediately.
               </p>
             </div>
           </div>

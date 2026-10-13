@@ -22,31 +22,46 @@ export function LeadDetailActions({
   status: LeadStatus;
   priority: LeadPriority;
 }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const handleMarkContacted = () => {
     startTransition(async () => {
-      await markContactedAction(leadId);
+      const res = await markContactedAction(leadId);
+      if (res && !res.success) {
+        toast({ message: res.error, state: "error" });
+      }
     });
   };
 
   const handleStatusChange = (newStatus: LeadStatus) => {
     startTransition(async () => {
-      await updateLeadAction(leadId, { status: newStatus });
+      const res = await updateLeadAction(leadId, { status: newStatus });
+      if (res && !res.success) {
+        toast({ message: res.error, state: "error" });
+      }
     });
   };
 
   const handlePriorityToggle = () => {
     const nextPriority = priority === "HOT" ? "NORMAL" : "HOT";
     startTransition(async () => {
-      await updateLeadAction(leadId, { priority: nextPriority });
+      const res = await updateLeadAction(leadId, { priority: nextPriority });
+      if (res && !res.success) {
+        toast({ message: res.error, state: "error" });
+      }
     });
   };
 
   const handleDelete = () => {
     if (confirm("Are you sure you want to permanently delete this lead?")) {
       startTransition(async () => {
-        await deleteLeadAction(leadId);
+        const res = await deleteLeadAction(leadId);
+        if (res && !res.success) {
+          toast({ message: res.error, state: "error" });
+          return;
+        }
+        router.push("/leads");
       });
     }
   };

@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 
 export type AuthProviderType = "authjs";
@@ -46,9 +45,9 @@ function isNextControlFlowError(err: unknown): boolean {
 
 /**
  * Retrieves the currently authenticated user from Auth.js.
- * Returns null if unauthenticated. Deduplicated per request lifecycle via React cache.
+ * Returns null if unauthenticated.
  */
-export const getCurrentUser = cache(async function getCurrentUser(): Promise<CurrentAuthUser | null> {
+export async function getCurrentUser(): Promise<CurrentAuthUser | null> {
   try {
     const { auth: authjsAuth } = await import("@/auth");
     const session = await authjsAuth();
@@ -69,7 +68,7 @@ export const getCurrentUser = cache(async function getCurrentUser(): Promise<Cur
   }
 
   return null;
-});
+}
 
 /**
  * Requires an authenticated user, following application semantics:

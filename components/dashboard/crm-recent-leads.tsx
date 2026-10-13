@@ -178,8 +178,8 @@ export function CrmRecentLeads({ leads }: { leads: Lead[] }) {
                       </span>
                     </TableCell>
 
-                    <TableCell className="py-3 font-mono text-[12px] text-[var(--ink-muted)]">
-                      {formatRelative(lead.createdAt)}
+                    <TableCell className="py-3 font-mono text-[12px] text-[var(--ink-muted)]" suppressHydrationWarning>
+                      <span suppressHydrationWarning>{formatRelative(lead.createdAt)}</span>
                     </TableCell>
 
                     <TableCell className="py-3 text-right pr-0">

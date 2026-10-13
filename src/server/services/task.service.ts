@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { TaskType, Prisma } from "@prisma/client";
 
@@ -179,7 +178,7 @@ export async function getRescueQueue(businessId: string) {
   });
 }
 
-export const getRescueQueueCount = cache(async function getRescueQueueCount(businessId: string) {
+export async function getRescueQueueCount(businessId: string) {
   const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
   return prisma.lead.count({
     where: {
@@ -189,7 +188,7 @@ export const getRescueQueueCount = cache(async function getRescueQueueCount(busi
       createdAt: { lt: cutoff },
     },
   });
-});
+}
 
 export async function getLeadAnalytics(businessId: string) {
   const [bySource, byStatus] = await Promise.all([

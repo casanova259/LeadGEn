@@ -58,7 +58,7 @@ export function EditLeadDialog({
 
     startTransition(async () => {
       try {
-        await updateLeadAction(lead.id, {
+        const res = await updateLeadAction(lead.id, {
           name: name.trim() || lead.name,
           phone: phone.trim() || undefined,
           email: email.trim() || undefined,
@@ -66,6 +66,14 @@ export function EditLeadDialog({
           priority,
           notes: notes.trim() || undefined,
         });
+
+        if (res && !res.success) {
+          toast({
+            message: `Update failed: ${res.error || "Server error"}`,
+            state: "error",
+          });
+          return;
+        }
 
         toast({
           message: `Lead "${name.trim() || lead.name}" updated successfully`,

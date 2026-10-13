@@ -12,39 +12,54 @@ import {
 } from "@/src/server/services/lead.service";
 
 export async function createLeadAction(input: Omit<CreateLeadInput, "businessId">) {
-  const business = await getOrCreateBusiness();
-  const lead = await createLead({ ...input, businessId: business.id });
-  revalidatePath("/leads");
-  revalidatePath("/dashboard");
-  revalidatePath("/tasks");
-  return lead;
+  try {
+    const business = await getOrCreateBusiness();
+    const lead = await createLead({ ...input, businessId: business.id });
+    revalidatePath("/leads");
+    return { success: true as const, lead };
+  } catch (err: any) {
+    console.error("[createLeadAction error]:", err);
+    return { success: false as const, error: err?.message || "Failed to create lead" };
+  }
 }
 
 export async function updateLeadAction(id: string, input: UpdateLeadInput) {
-  const business = await getOrCreateBusiness();
-  await updateLead(id, business.id, input);
-  revalidatePath("/leads");
-  revalidatePath(`/leads/${id}`);
-  revalidatePath("/dashboard");
+  try {
+    const business = await getOrCreateBusiness();
+    const lead = await updateLead(id, business.id, input);
+    revalidatePath("/leads");
+    return { success: true as const, lead };
+  } catch (err: any) {
+    console.error("[updateLeadAction error]:", err);
+    return { success: false as const, error: err?.message || "Failed to update lead" };
+  }
 }
 
 export async function markContactedAction(id: string) {
-  const business = await getOrCreateBusiness();
-  await updateLead(id, business.id, {
-    status: "CONTACTED",
-    contactedAt: new Date(),
-  });
-  revalidatePath("/leads");
-  revalidatePath(`/leads/${id}`);
-  revalidatePath("/dashboard");
+  try {
+    const business = await getOrCreateBusiness();
+    const lead = await updateLead(id, business.id, {
+      status: "CONTACTED",
+      contactedAt: new Date(),
+    });
+    revalidatePath("/leads");
+    return { success: true as const, lead };
+  } catch (err: any) {
+    console.error("[markContactedAction error]:", err);
+    return { success: false as const, error: err?.message || "Failed to mark contacted" };
+  }
 }
 
 export async function deleteLeadAction(id: string) {
-  const business = await getOrCreateBusiness();
-  await deleteLead(id, business.id);
-  revalidatePath("/leads");
-  revalidatePath("/dashboard");
-  redirect("/leads");
+  try {
+    const business = await getOrCreateBusiness();
+    await deleteLead(id, business.id);
+    revalidatePath("/leads");
+    return { success: true as const };
+  } catch (err: any) {
+    console.error("[deleteLeadAction error]:", err);
+    return { success: false as const, error: err?.message || "Failed to delete lead" };
+  }
 }
 
 export async function addLeadNoteAction(

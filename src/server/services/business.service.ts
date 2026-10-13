@@ -1,8 +1,7 @@
-import { cache } from "react";
 import { requireCurrentUser } from "@/src/server/services/auth.service";
 import { prisma } from "@/lib/prisma";
 
-export const getOrCreateBusiness = cache(async function getOrCreateBusiness(
+export async function getOrCreateBusiness(
   userId?: string,
   userName?: string | null
 ) {
@@ -32,7 +31,7 @@ export const getOrCreateBusiness = cache(async function getOrCreateBusiness(
   }
 
   return business;
-});
+}
 
 export async function updateBusiness(
   ownerId: string,

@@ -185,7 +185,14 @@ export function LeadsTable({
   const handleStatusChange = async (leadId: string, newStatus: LeadStatus) => {
     startTransition(async () => {
       try {
-        await updateLeadAction(leadId, { status: newStatus });
+        const res = await updateLeadAction(leadId, { status: newStatus });
+        if (res && !res.success) {
+          toast({
+            message: `Could not update status: ${res.error || "Error"}`,
+            state: "error",
+          });
+          return;
+        }
         toast({
           message: `Stage updated to ${STATUS_CONFIG[newStatus].label}`,
           state: "success",
@@ -206,7 +213,14 @@ export function LeadsTable({
     setDeletingId(lead.id);
     startTransition(async () => {
       try {
-        await deleteLeadAction(lead.id);
+        const res = await deleteLeadAction(lead.id);
+        if (res && !res.success) {
+          toast({
+            message: `Delete failed: ${res.error || "Error"}`,
+            state: "error",
+          });
+          return;
+        }
         toast({
           message: `Lead "${lead.name}" deleted`,
           state: "success",
@@ -423,8 +437,8 @@ export function LeadsTable({
                   </TableCell>
 
                   {/* 6. Relative Time Added */}
-                  <TableCell className="py-3 text-xs text-[var(--ink-muted)] whitespace-nowrap">
-                    {formatRelativeTime(lead.createdAt)}
+                  <TableCell className="py-3 text-xs text-[var(--ink-muted)] whitespace-nowrap" suppressHydrationWarning>
+                    <span suppressHydrationWarning>{formatRelativeTime(lead.createdAt)}</span>
                   </TableCell>
 
                   {/* 7. Quick Row Actions */}
