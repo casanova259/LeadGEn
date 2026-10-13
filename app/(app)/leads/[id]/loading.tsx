@@ -57,13 +57,10 @@ export default function LeadDetailLoading() {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        <div className="lg:col-span-5">
-          <Card className="border-border bg-card h-full">
+          <Card className="border-border bg-card">
             <CardHeader className="pb-3">
-              <Skeleton className="h-5 w-32 bg-muted" />
-              <Skeleton className="h-3 w-44 bg-muted/60" />
+              <Skeleton className="h-5 w-36 bg-muted" />
+              <Skeleton className="h-3 w-52 bg-muted/60" />
             </CardHeader>
             <CardContent className="space-y-6 pt-2">
               {[1, 2, 3].map((i) => (
@@ -75,6 +72,37 @@ export default function LeadDetailLoading() {
                   </div>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-5 space-y-6">
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3">
+              <Skeleton className="h-5 w-40 bg-muted" />
+              <Skeleton className="h-3 w-48 bg-muted/60" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-24 w-full rounded-lg bg-muted/50" />
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-28 bg-muted/60" />
+                <Skeleton className="h-4 w-full bg-muted" />
+                <Skeleton className="h-4 w-3/4 bg-muted" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3">
+              <Skeleton className="h-4 w-32 bg-muted" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex gap-2">
+                <Skeleton className="h-8 w-16 rounded-md bg-muted" />
+                <Skeleton className="h-8 w-20 rounded-md bg-muted" />
+                <Skeleton className="h-8 w-20 rounded-md bg-muted" />
+              </div>
+              <Skeleton className="h-20 w-full rounded-md bg-muted/50" />
             </CardContent>
           </Card>
         </div>

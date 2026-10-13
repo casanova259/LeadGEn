@@ -255,19 +255,8 @@ export default async function LeadDetailPage({
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Right Column: AI Follow-Up Strategy, Interaction Logger & Activity Timeline */}
-        <div className="lg:col-span-5 space-y-6">
-          <AiFollowUpCard
-            leadId={lead.id}
-            leadPhone={lead.phone}
-            leadEmail={lead.email}
-            initialRecommendation={initialAiRec}
-          />
-
-          <LeadNoteComposer leadId={lead.id} />
-
+          {/* Activity Timeline Card */}
           <Card className="border-border bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Activity Timeline</CardTitle>
@@ -358,6 +347,18 @@ export default async function LeadDetailPage({
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* Right Column: AI Follow-Up Strategy & Interaction Logger */}
+        <div className="lg:col-span-5 space-y-6">
+          <AiFollowUpCard
+            leadId={lead.id}
+            leadPhone={lead.phone}
+            leadEmail={lead.email}
+            initialRecommendation={initialAiRec}
+          />
+
+          <LeadNoteComposer leadId={lead.id} />
         </div>
       </div>
     </div>
