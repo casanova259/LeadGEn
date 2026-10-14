@@ -152,6 +152,7 @@ const SlideIn = ({
   className,
   y = 20,
   duration = 0.3,
+  delay = 0,
   onComplete,
 }: {
   active: boolean;
@@ -159,6 +160,7 @@ const SlideIn = ({
   className?: string;
   y?: number;
   duration?: number;
+  delay?: number;
   onComplete?: () => void;
 }) => {
   const prefersReducedMotion = useReducedMotion();
@@ -175,6 +177,7 @@ const SlideIn = ({
       transition={{
         type: "tween",
         duration: prefersReducedMotion ? 0.2 : duration,
+        delay: prefersReducedMotion ? 0 : delay,
         ease: easeOutCubic,
       }}
       onAnimationComplete={() => {
@@ -190,35 +193,11 @@ const SlideIn = ({
 
 const Hero01Content = () => {
   const prefersReducedMotion = useReducedMotion();
-  const navDoneRef = useRef(false);
 
-  const [showHero, setShowHero] = useState(false);
-  const [showDescription, setShowDescription] = useState(false);
-  const [showCtas, setShowCtas] = useState(false);
+  const [showHero] = useState(true);
+  const [showDescription] = useState(true);
+  const [showCtas] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!prefersReducedMotion) return;
-    setShowHero(true);
-    setShowDescription(true);
-    setShowCtas(true);
-  }, [prefersReducedMotion]);
-
-  const handleNavComplete = () => {
-    if (navDoneRef.current || prefersReducedMotion) return;
-    navDoneRef.current = true;
-    setShowHero(true);
-  };
-
-  const handleSpotlightComplete = () => {
-    if (prefersReducedMotion) return;
-    setShowDescription(true);
-  };
-
-  const handleDescriptionComplete = () => {
-    if (prefersReducedMotion) return;
-    setShowCtas(true);
-  };
 
   return (
     <section className="relative w-full min-h-screen overflow-x-hidden bg-gradient-to-b from-orange-50 via-white to-neutral-50 text-[#010110] flex flex-col justify-between">
@@ -236,7 +215,6 @@ const Hero01Content = () => {
               duration: prefersReducedMotion ? 0.2 : 0.3,
               ease: easeOutCubic,
             }}
-            onAnimationComplete={handleNavComplete}
           >
             <a
               href="#main"
@@ -338,14 +316,13 @@ const Hero01Content = () => {
                 blur={6}
                 delay={0}
                 active={showHero}
-                onComplete={handleSpotlightComplete}
                 className="text-[32px] md:text-[44px] lg:text-[56px] font-medium leading-[1.15] tracking-[-0.02em] text-wrap text-[#010110] [text-shadow:0_5px_5px_rgba(0,0,0,0.05),0_1px_1px_rgba(0,0,0,0.16),0_1px_1px_rgba(255,255,255,0.6)] ipad:leading-[1.1]"
               />
               <SlideIn
                 active={showDescription}
                 y={16}
                 duration={0.3}
-                onComplete={handleDescriptionComplete}
+                delay={0.08}
                 className="max-w-118.75 will-change-transform"
               >
                 <p className="px-1 text-[clamp(15px,2.5vw,16px)] font-medium leading-normal tracking-[-0.02em] text-pretty text-[#45545e] ipad:px-0">
@@ -360,6 +337,7 @@ const Hero01Content = () => {
               active={showCtas}
               y={20}
               duration={0.3}
+              delay={0.16}
               className="relative flex w-full flex-col items-stretch gap-3 will-change-transform ipad:w-auto ipad:flex-row ipad:items-center ipad:justify-center ipad:gap-5"
             >
               <Annotation />

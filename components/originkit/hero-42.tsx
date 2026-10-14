@@ -401,29 +401,56 @@ void main() {
     resize();
     let rafId: number | null = null;
     let lastTime = 0;
+    let isVisible = false;
     const FRAME_INTERVAL = 1000 / 30;
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const tick = (time: number) => {
+      if (!isVisible) return;
+      rafId = requestAnimationFrame(tick);
+      if (time - lastTime < FRAME_INTERVAL) return;
+      lastTime = time;
+      draw(time);
+    };
+
+    const startLoop = () => {
+      if (prefersReducedMotion) {
+        draw(0);
+      } else if (!rafId) {
+        rafId = requestAnimationFrame(tick);
+      }
+    };
+
+    const stopLoop = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          startLoop();
+        } else {
+          stopLoop();
+        }
+      },
+      { rootMargin: "100px" }
+    );
+    io.observe(canvasEl);
 
     const ro = new ResizeObserver(() => {
       resize();
-      draw(lastTime);
+      if (isVisible) draw(lastTime);
     });
     ro.observe(canvasEl);
 
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) {
-      draw(0);
-    } else {
-      const tick = (time: number) => {
-        rafId = requestAnimationFrame(tick);
-        if (time - lastTime < FRAME_INTERVAL) return;
-        lastTime = time;
-        draw(time);
-      };
-      rafId = requestAnimationFrame(tick);
-    }
-
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
+      stopLoop();
+      io.disconnect();
       ro.disconnect();
       gl.deleteFramebuffer(fbo);
       gl.deleteTexture(rtTex);
@@ -488,7 +515,7 @@ export default function Hero42({
           <div className="cards">
             {/* Card 1: Focus & Smart Lead Insights */}
             <div className="card card--flex">
-              <img className="card__bg" src="/hero-42/card1-bg.jpg" alt="" />
+              <img className="card__bg" src="/hero-42/card1-bg.jpg" alt="" loading="lazy" decoding="async" />
               <DotMatrixCanvas
                 cellSize={12}
                 colors="#0A2013FF,#0B321CFF,#084425FF"
@@ -567,7 +594,7 @@ export default function Hero42({
 
             {/* Card 2: Connect & Intelligent Response Engine */}
             <div className="card card--wide">
-              <img className="card__bg" src="/hero-42/card2-bg.jpg" alt="" />
+              <img className="card__bg" src="/hero-42/card2-bg.jpg" alt="" loading="lazy" decoding="async" />
               <DotMatrixCanvas
                 cellSize={12}
                 colors="#0C201AFF,#0C2755FF,#093A47FF"
@@ -591,13 +618,13 @@ export default function Hero42({
                     className="draft__hl"
                     style={{ left: 9, top: 47, width: 112 }}
                   >
-                    <img src="/hero-42/card2-bg.jpg" alt="" />
+                    <img src="/hero-42/card2-bg.jpg" alt="" loading="lazy" decoding="async" />
                   </div>
                   <div
                     className="draft__hl"
                     style={{ left: 31, top: 111, width: 145 }}
                   >
-                    <img src="/hero-42/card2-bg.jpg" alt="" />
+                    <img src="/hero-42/card2-bg.jpg" alt="" loading="lazy" decoding="async" />
                   </div>
                   <div className="draft__text">
                     <p>Hey Alex,</p>
@@ -661,7 +688,7 @@ export default function Hero42({
 
             {/* Card 3: Scale & Predictive Performance Metrics */}
             <div className="card card--flex">
-              <img className="card__bg" src="/hero-42/card3-bg.jpg" alt="" />
+              <img className="card__bg" src="/hero-42/card3-bg.jpg" alt="" loading="lazy" decoding="async" />
               <DotMatrixCanvas
                 cellSize={12}
                 colors="#0C1528FF,#17243CFF,#212F45FF"

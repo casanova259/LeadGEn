@@ -1,9 +1,13 @@
+import dynamic from "next/dynamic";
 import Hero01 from "@/components/originkit/hero-01";
 import Features01 from "@/components/originkit/features-01";
-import Hero42 from "@/components/originkit/hero-42";
-import Pricing01 from "@/components/originkit/pricing-01";
-import { FaqSection } from "@/components/originkit/faq-section";
 import { Footer } from "@/components/originkit/footer";
+
+const Hero42 = dynamic(() => import("@/components/originkit/hero-42"));
+const Pricing01 = dynamic(() => import("@/components/originkit/pricing-01"));
+const FaqSection = dynamic(() =>
+  import("@/components/originkit/faq-section").then((mod) => mod.FaqSection)
+);
 
 export default function LandingPage() {
   return (
