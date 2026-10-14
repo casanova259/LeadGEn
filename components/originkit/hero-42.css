@@ -35,7 +35,7 @@
   inset: 0;
   opacity: 0.2;
   pointer-events: none;
-  background: url("/hero-42/texture.png") top left / 1076.1488px 1076.1488px repeat;
+  background: url("/hero-42/texture.webp") top left / 1076.1488px 1076.1488px repeat;
 }
 
 .hero-42-section .frame {
@@ -530,7 +530,7 @@
   font-weight: 400;
   font-size: 12px;
   line-height: 1.25;
-  color: rgba(0,0,0,0.45);
+  color: rgba(0,0,0,0.72);
   text-align: left;
   white-space: nowrap;
 }
@@ -587,7 +587,7 @@
   font-weight: 400;
   font-size: 12px;
   line-height: 1.35;
-  color: rgba(0,0,0,0.45);
+  color: rgba(0,0,0,0.72);
   text-align: left;
 }
 

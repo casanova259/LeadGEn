@@ -515,7 +515,7 @@ export default function Hero42({
           <div className="cards">
             {/* Card 1: Focus & Smart Lead Insights */}
             <div className="card card--flex">
-              <img className="card__bg" src="/hero-42/card1-bg.jpg" alt="" loading="lazy" decoding="async" />
+              <img className="card__bg" src="/hero-42/card1-bg.webp" alt="" loading="lazy" decoding="async" />
               <DotMatrixCanvas
                 cellSize={12}
                 colors="#0A2013FF,#0B321CFF,#084425FF"
@@ -594,7 +594,7 @@ export default function Hero42({
 
             {/* Card 2: Connect & Intelligent Response Engine */}
             <div className="card card--wide">
-              <img className="card__bg" src="/hero-42/card2-bg.jpg" alt="" loading="lazy" decoding="async" />
+              <img className="card__bg" src="/hero-42/card2-bg.webp" alt="" loading="lazy" decoding="async" />
               <DotMatrixCanvas
                 cellSize={12}
                 colors="#0C201AFF,#0C2755FF,#093A47FF"
@@ -618,13 +618,13 @@ export default function Hero42({
                     className="draft__hl"
                     style={{ left: 9, top: 47, width: 112 }}
                   >
-                    <img src="/hero-42/card2-bg.jpg" alt="" loading="lazy" decoding="async" />
+                    <img src="/hero-42/card2-bg.webp" alt="" loading="lazy" decoding="async" />
                   </div>
                   <div
                     className="draft__hl"
                     style={{ left: 31, top: 111, width: 145 }}
                   >
-                    <img src="/hero-42/card2-bg.jpg" alt="" loading="lazy" decoding="async" />
+                    <img src="/hero-42/card2-bg.webp" alt="" loading="lazy" decoding="async" />
                   </div>
                   <div className="draft__text">
                     <p>Hey Alex,</p>
@@ -688,7 +688,7 @@ export default function Hero42({
 
             {/* Card 3: Scale & Predictive Performance Metrics */}
             <div className="card card--flex">
-              <img className="card__bg" src="/hero-42/card3-bg.jpg" alt="" loading="lazy" decoding="async" />
+              <img className="card__bg" src="/hero-42/card3-bg.webp" alt="" loading="lazy" decoding="async" />
               <DotMatrixCanvas
                 cellSize={12}
                 colors="#0C1528FF,#17243CFF,#212F45FF"

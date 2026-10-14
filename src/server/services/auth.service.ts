@@ -82,7 +82,9 @@ export async function requireCurrentUser(): Promise<CurrentAuthUser> {
       const { headers } = await import("next/headers");
       const headerList = await headers();
       const accept = headerList.get("accept") ?? "";
-      if (accept.includes("text/html")) {
+      const isPageContext =
+        accept.includes("text/html") || accept.includes("text/x-component");
+      if (isPageContext) {
         const { redirect } = await import("next/navigation");
         redirect("/sign-in");
       }

@@ -110,7 +110,7 @@ const RescueQueuePreview = () => (
               <p className="text-xs text-neutral-500">{lead.source}</p>
             </div>
           </div>
-          <span className="text-xs font-medium text-neutral-400">{lead.wait}</span>
+          <span className="text-xs font-medium text-neutral-600">{lead.wait}</span>
         </div>
       ))}
     </div>

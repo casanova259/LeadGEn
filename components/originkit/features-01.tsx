@@ -97,7 +97,7 @@ const RescueQueueMock = () => (
             <span className={`h-2 w-2 rounded-full ${l.color}`} />
             <span className="text-sm font-medium text-neutral-800">{l.name}</span>
           </div>
-          <span className="text-xs text-neutral-400">{l.wait}</span>
+          <span className="text-xs text-neutral-600">{l.wait}</span>
         </div>
       ))}
     </div>
@@ -116,7 +116,7 @@ const AutoTaskMock = () => (
         <p className="text-xs text-neutral-500">Auto-created · due in 24h</p>
       </div>
     </div>
-    <p className="mt-3 text-xs text-neutral-400">Created automatically the instant the lead came in — no setup needed.</p>
+    <p className="mt-3 text-xs text-neutral-600">Created automatically the instant the lead came in — no setup needed.</p>
   </div>
 );
 
@@ -180,7 +180,7 @@ const AnalyticsMock = () => (
         <div key={i} className="flex-1 rounded-t-md bg-orange-400/80" style={{ height: `${h}%` }} />
       ))}
     </div>
-    <p className="mt-3 text-xs text-neutral-400">Leads by source, status, and conversion — always current.</p>
+    <p className="mt-3 text-xs text-neutral-600">Leads by source, status, and conversion — always current.</p>
   </div>
 );
 
@@ -250,7 +250,7 @@ const FeatureTabVisual = ({
         </span>
         <span
           className={`text-[13px] font-medium leading-[1.1] tracking-[-0.01em] iphone:text-[13px] ${
-            isActive ? "text-[#4c6a75]" : "text-[#60605d]"
+            isActive ? "text-[#0d4857]" : "text-[#525252]"
           }`}
         >
           {feature.description}
@@ -389,12 +389,12 @@ const Features01 = () => {
       >
         <div className="relative z-10 flex w-full flex-col items-center gap-10 ipad:gap-15">
           <header className="flex w-full max-w-180 flex-col items-center gap-3 text-center">
-            <h1
+            <h2
               id="features-heading"
               className="animate-section-rise text-wrap text-[clamp(2rem,4vw,2.5rem)] font-medium leading-[1.12] tracking-[-0.04em] text-[#010110] motion-reduce:animate-none [animation-delay:0ms]"
             >
               Everything you need, nothing you don&apos;t
-            </h1>
+            </h2>
             <p className="animate-section-rise max-w-155 text-pretty text-[16px] font-medium leading-normal tracking-[-0.02em] text-[#45545e] iphone:text-base motion-reduce:animate-none [animation-delay:80ms]">
               Built for owners who need follow-up handled, not another
               dashboard to babysit.

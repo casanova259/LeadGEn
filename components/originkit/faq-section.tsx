@@ -270,7 +270,7 @@ export function FaqSection() {
         {/* Still have questions card */}
         <div className="mt-14 rounded-2xl border border-[#eae4e2] bg-white p-6 text-center flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
           <div className="text-center sm:text-left">
-            <h4 className="font-switzer font-semibold text-[#111] text-base">Still have questions?</h4>
+            <h3 className="font-switzer font-semibold text-[#111] text-base">Still have questions?</h3>
             <p className="text-sm text-[#666] mt-0.5">We are happy to answer any technical or setup questions.</p>
           </div>
           <a

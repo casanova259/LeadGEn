@@ -10,7 +10,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#101010] text-[#888] border-t border-[#1e1e1e] pt-16 pb-12 px-4 sm:px-6 lg:px-8">
+    <footer className="bg-[#101010] text-[#a8a8a8] border-t border-[#1e1e1e] pt-16 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-[#1e1e1e]">
           {/* Brand Column */}
@@ -23,7 +23,7 @@ export function Footer() {
                 Lost Leads
               </span>
             </div>
-            <p className="text-sm text-[#888] max-w-sm leading-relaxed">
+            <p className="text-sm text-[#a8a8a8] max-w-sm leading-relaxed">
               Stop losing leads you already paid for. Automated 24h follow-up tasks, live Rescue Queue alerts, and daily email digests for busy small businesses.
             </p>
             <div className="flex items-center gap-2 pt-1">
@@ -31,7 +31,7 @@ export function Footer() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full size-2 bg-emerald-500" />
               </span>
-              <span className="text-xs font-mono text-[#888]">All systems operational</span>
+              <span className="text-xs font-mono text-[#a8a8a8]">All systems operational</span>
             </div>
           </div>
 
@@ -89,7 +89,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#666]">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9e9e9e]">
           <p>&copy; {currentYear} Lost Leads, Inc. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span>Built for clinics, salons, real estate &amp; agencies</span>

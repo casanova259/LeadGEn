@@ -2,13 +2,10 @@
 "use client";
 
 import "./pricing-01.css";
-import { useLayoutEffect, useRef } from "react";
 import {
   BillingCycleControl,
   useBillingCycle,
 } from "@/components/originkit/ui/pricing-01/billing-toggle";
-
-const PRICE_SUFFIX_EASE = "cubic-bezier(.215,.61,.355,1)";
 
 type PricingPlan = {
   name: string;
@@ -156,104 +153,10 @@ const PriceRow = ({
   yearlyPrice: number;
   isYearly: boolean;
 }) => {
-  const rowRef = useRef<HTMLDivElement>(null);
-  const suffixRef = useRef<HTMLSpanElement>(null);
-  const previousOffset = useRef<{ x: number; y: number } | null>(null);
-  const clearAnimationRef = useRef<(() => void) | null>(null);
-
-  const readOffset = () => {
-    const row = rowRef.current;
-    const suffix = suffixRef.current;
-    if (!row || !suffix) return null;
-
-    const rowRect = row.getBoundingClientRect();
-    const suffixRect = suffix.getBoundingClientRect();
-
-    return {
-      x: suffixRect.left - rowRect.left,
-      y: suffixRect.top - rowRect.top,
-    };
-  };
-
-  useLayoutEffect(() => {
-    const row = rowRef.current;
-    if (!row) return;
-
-    const syncOffset = () => {
-      clearAnimationRef.current?.();
-      previousOffset.current = readOffset();
-    };
-
-    const observer = new ResizeObserver(syncOffset);
-    observer.observe(row);
-    window.addEventListener("resize", syncOffset);
-    syncOffset();
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", syncOffset);
-      clearAnimationRef.current?.();
-    };
-  }, []);
-
-  useLayoutEffect(() => {
-    const suffix = suffixRef.current;
-    if (!suffix) return;
-
-    const offset = readOffset();
-    if (!offset) return;
-
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const prev = previousOffset.current;
-
-    clearAnimationRef.current?.();
-
-    if (prev !== null && !prefersReducedMotion) {
-      const deltaX = prev.x - offset.x;
-      const deltaY = prev.y - offset.y;
-      const sameRow = Math.abs(deltaY) < 1;
-
-      if (sameRow && Math.abs(deltaX) > 0.5) {
-        suffix.style.willChange = "transform";
-        suffix.style.transform = `translateX(${deltaX}px)`;
-        suffix.style.transition = "none";
-        suffix.getBoundingClientRect();
-        suffix.style.transition = `transform 200ms ${PRICE_SUFFIX_EASE}`;
-        suffix.style.transform = "translateX(0)";
-
-        const handleEnd = (event: TransitionEvent) => {
-          if (event.propertyName !== "transform") return;
-          suffix.style.willChange = "auto";
-          suffix.style.transition = "";
-          suffix.style.transform = "";
-          suffix.removeEventListener("transitionend", handleEnd);
-          clearAnimationRef.current = null;
-        };
-
-        clearAnimationRef.current = () => {
-          suffix.removeEventListener("transitionend", handleEnd);
-          suffix.style.willChange = "auto";
-          suffix.style.transition = "";
-          suffix.style.transform = "";
-          clearAnimationRef.current = null;
-        };
-
-        suffix.addEventListener("transitionend", handleEnd);
-      }
-    }
-
-    previousOffset.current = offset;
-  }, [isYearly]);
-
-  const priceClassName = `col-start-1 row-start-1 font-switzer text-[clamp(30px,9vw,2.625rem)] font-semibold tabular-nums leading-none tracking-[-0.04em] will-change-[opacity] transition-opacity duration-200 ease-[cubic-bezier(.215,.61,.355,1)] motion-reduce:transition-none`;
+  const priceClassName = `col-start-1 row-start-1 font-switzer text-[clamp(30px,9vw,2.625rem)] font-semibold tabular-nums leading-none tracking-[-0.04em] transition-opacity duration-200 ease-[cubic-bezier(.215,.61,.355,1)] motion-reduce:transition-none`;
 
   return (
-    <div
-      ref={rowRef}
-      className="flex flex-wrap items-end gap-x-2 gap-y-0.5 iphone:flex-nowrap"
-    >
+    <div className="flex flex-wrap items-end gap-x-2 gap-y-0.5 iphone:flex-nowrap">
       <span
         className="relative inline-grid justify-items-start"
         aria-live="polite"
@@ -281,10 +184,7 @@ const PriceRow = ({
           ${yearlyPrice}
         </span>
       </span>
-      <span
-        ref={suffixRef}
-        className="flex items-baseline text-[15px] font-medium leading-normal text-[#4d4d4d] will-change-transform iphone:text-[17px]"
-      >
+      <span className="flex items-baseline text-[15px] font-medium leading-normal text-[#4d4d4d] iphone:text-[17px]">
         <span className="whitespace-nowrap">per month /&nbsp;</span>
         <span className="relative inline-grid justify-items-start">
           <span
@@ -295,7 +195,7 @@ const PriceRow = ({
           </span>
           <span
             aria-hidden={isYearly}
-            className={`col-start-1 row-start-1 whitespace-nowrap will-change-[opacity] transition-opacity duration-200 ease-[cubic-bezier(.215,.61,.355,1)] motion-reduce:transition-none ${
+            className={`col-start-1 row-start-1 whitespace-nowrap transition-opacity duration-200 ease-[cubic-bezier(.215,.61,.355,1)] motion-reduce:transition-none ${
               isYearly ? "pointer-events-none opacity-0" : "opacity-100"
             }`}
           >
@@ -303,7 +203,7 @@ const PriceRow = ({
           </span>
           <span
             aria-hidden={!isYearly}
-            className={`col-start-1 row-start-1 whitespace-nowrap will-change-[opacity] transition-opacity duration-200 ease-[cubic-bezier(.215,.61,.355,1)] motion-reduce:transition-none ${
+            className={`col-start-1 row-start-1 whitespace-nowrap transition-opacity duration-200 ease-[cubic-bezier(.215,.61,.355,1)] motion-reduce:transition-none ${
               isYearly ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -332,12 +232,12 @@ const Pricing01 = () => {
             Pricing &amp; Plans
           </span>
           <div className="flex flex-col items-center gap-3.5">
-            <h1
+            <h2
               id="pricing-heading"
               className="font-switzer font-semibold leading-[1.2] tracking-[-0.04em] text-[clamp(30px,4vw,52px)]"
             >
               Simple pricing that pays for itself
-            </h1>
+            </h2>
 
             <p className="max-w-155 text-[17px] font-medium leading-6.5 text-[#3d3d3d] sm:text-lg">
               If Lost Leads rescues 2–3 deals a month, it&apos;s already worth
@@ -388,9 +288,9 @@ const Pricing01 = () => {
 
                     <div className="flex flex-col gap-6 iphone:gap-7.5">
                       <div className="flex flex-col gap-0.5">
-                        <h2 className="text-xl font-semibold leading-normal iphone:text-[22px]">
+                        <h3 className="text-xl font-semibold leading-normal iphone:text-[22px]">
                           {plan.name}
-                        </h2>
+                        </h3>
                         <p className="text-[15px] font-medium leading-normal text-[#4d4d4d] iphone:text-[17px]">
                           {plan.description}
                         </p>

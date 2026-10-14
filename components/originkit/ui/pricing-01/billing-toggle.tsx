@@ -78,7 +78,7 @@ export const BillingCycleControl = ({
     >
       <span
         className={`transition-colors duration-200 ease motion-reduce:transition-none ${
-          isYearly ? "text-[#808080]" : "text-[#111]"
+          isYearly ? "text-[#595959]" : "text-[#111]"
         }`}
       >
         {monthlyLabel}
@@ -88,7 +88,7 @@ export const BillingCycleControl = ({
 
       <span
         className={`transition-colors duration-200 ease motion-reduce:transition-none ${
-          isYearly ? "text-[#111]" : "text-[#808080]"
+          isYearly ? "text-[#111]" : "text-[#595959]"
         }`}
       >
         {yearlyLabel}
