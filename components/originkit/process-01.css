@@ -1,11 +1,4 @@
-/* process-01 — Clash Grotesk + phone motion tokens (from globals.css) */
-
-@font-face {
-  font-family: "Clash Grotesk";
-  src: url("/originkit/features-01/clash-grotesk.ttf") format("truetype");
-  font-weight: 400 700;
-  font-display: swap;
-}
+/* process-01 — Clash Grotesk font token + phone motion tokens (from globals.css) */
 
 @theme {
   --font-clash: "Clash Grotesk", Inter, ui-sans-serif, sans-serif;
